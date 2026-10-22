@@ -6,7 +6,11 @@ from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import FastAPI
+import hashlib
+import os
+import re
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -442,6 +446,7 @@ def api_execute(req: ActionRequest, approved: bool = False):
         "verified": verified,
         "message": message,
         "reasons": result.reasons,
+        "required_controls": result.required_controls,
     }
     AUDIT_LOG.insert(0, record)
     del AUDIT_LOG[100:]
@@ -451,6 +456,123 @@ def api_execute(req: ActionRequest, approved: bool = False):
 @app.get("/api/audit")
 def api_audit():
     return {"events": AUDIT_LOG}
+
+
+# Allowed safe document types and prohibited executable extensions
+ALLOWED_UPLOAD_EXTENSIONS: set[str] = {
+    ".txt", ".pdf", ".json", ".csv", ".md", ".log", ".yaml", ".yml", ".docx", ".xlsx"
+}
+PROHIBITED_UPLOAD_EXTENSIONS: set[str] = {
+    ".exe", ".sh", ".bat", ".bin", ".py", ".cmd", ".vbs", ".ps1", ".dll", ".so"
+}
+MAX_UPLOAD_SIZE: int = 5 * 1024 * 1024  # 5 MB
+UPLOADED_FILES: dict[str, dict[str, Any]] = {}
+
+
+def extract_file_payload(content_type: str, body: bytes, headers: Any) -> tuple[str, bytes]:
+    """Safely extracts filename and file payload from multipart/form-data or raw request body."""
+    if "multipart/form-data" in content_type:
+        import email
+        from email.policy import default
+
+        header_bytes = f"Content-Type: {content_type}\r\n\r\n".encode("latin1")
+        msg = email.message_from_bytes(header_bytes + body, policy=default)
+        for part in msg.iter_parts():
+            fn = part.get_filename()
+            if fn:
+                payload = part.get_payload(decode=True)
+                if payload is not None:
+                    return fn, payload
+
+    fallback_name = headers.get("x-filename") or "uploaded_document.txt"
+    return fallback_name, body
+
+
+@app.post("/api/upload")
+async def api_upload(request: Request):
+    """Mock file upload to agent sandbox.
+
+    Validates file format and size, extracts metadata (SHA256, size),
+    and stages it in the mock agent workspace.
+    No file execution is permitted. File contents are never exposed in audit logs.
+    """
+    body = await request.body()
+    if not body:
+        raise HTTPException(status_code=400, detail="No file content provided.")
+
+    if len(body) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds maximum allowed limit (5MB).")
+
+    content_type = request.headers.get("content-type", "")
+    raw_filename, file_bytes = extract_file_payload(content_type, body, request.headers)
+
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Empty file provided.")
+
+    if len(file_bytes) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=400, detail="File size exceeds maximum allowed limit (5MB).")
+
+    # Sanitize filename
+    clean_name = os.path.basename(raw_filename).strip()
+    clean_name = re.sub(r"[^a-zA-Z0-9_.-]", "_", clean_name)
+    if not clean_name:
+        clean_name = "document.txt"
+
+    _, ext = os.path.splitext(clean_name.lower())
+    if ext in PROHIBITED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File extension '{ext}' is prohibited for security reasons. Executable files cannot be staged.",
+        )
+    if ext not in ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file extension '{ext}'. Permitted formats: {', '.join(sorted(ALLOWED_UPLOAD_EXTENSIONS))}.",
+        )
+
+    sha256 = hashlib.sha256(file_bytes).hexdigest()
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    # Stage metadata only (no raw execution, no storage outside mock workspace)
+    UPLOADED_FILES[clean_name] = {
+        "filename": clean_name,
+        "size_bytes": len(file_bytes),
+        "sha256": sha256,
+        "staged_at": now_iso,
+    }
+
+    # Record safe audit event without exposing raw file content
+    AUDIT_LOG.insert(
+        0,
+        {
+            "request_id": str(uuid4())[:8],
+            "timestamp": now_iso,
+            "decision": Decision.ALLOW.value,
+            "risk_score": 5,
+            "intent_match": True,
+            "action_type": "upload",
+            "target": clean_name,
+            "status": "UPLOAD_STAGED",
+            "verified": True,
+            "message": f"Document '{clean_name}' staged in mock agent workspace. Validated: safe format ({ext}), size {len(file_bytes)} bytes, SHA-256 {sha256[:12]}...",
+            "reasons": [
+                f"[Upload Validation] File extension '{ext}' verified against allowed document whitelist.",
+                f"[Upload Validation] File size ({len(file_bytes)} bytes) is within safety threshold (<5MB).",
+                "[Upload Sandbox] Staged in isolated mock agent workspace. Real system execution is disabled.",
+            ],
+            "required_controls": ["File sandboxing active", "Execution disabled"],
+        },
+    )
+    del AUDIT_LOG[100:]
+
+    return {
+        "status": "ok",
+        "filename": clean_name,
+        "size_bytes": len(file_bytes),
+        "sha256": sha256,
+        "message": f"Document '{clean_name}' successfully staged in mock agent workspace (no execution performed).",
+    }
+
 
 
 if __name__ == "__main__":

@@ -2,73 +2,1315 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TRINETRA | AI Agent Safety Gateway</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRINETRA | AI Agent Action Safety Gateway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#182633;--muted:#65727e;--green:#176b52;--gold:#c58c27;--red:#c83c37;--line:#dbe4e1;--paper:#f7f9f8}
-*{box-sizing:border-box}body{margin:0;background:#eef2f3;color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-header{padding:26px max(24px,calc((100vw - 1180px)/2));background:#fff;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;font-size:12px}h1{margin:5px 0 4px;font-size:32px}header p{margin:0;color:var(--muted)}
-main{max-width:1180px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,.9fr);gap:20px}
-.card{background:white;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 5px 18px #1b344008}h2{font-size:18px;margin:0 0 15px}label{display:block;font-size:12px;font-weight:750;color:#475663;margin:12px 0 5px}
-input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cdd8d5;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:72px;resize:vertical}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;align-items:center;gap:8px;margin:12px 0;color:#43525d}.check input{width:auto}
-button{border:0;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer;background:var(--green);color:white}button.secondary{background:#eaf2ef;color:var(--green);border:1px solid #c8ddd5}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
-.pill{display:inline-block;border-radius:999px;padding:5px 10px;font-weight:850;font-size:12px;background:#eef2f3}.ALLOW{color:var(--green);background:#e4f5ed}.REQUIRE_APPROVAL{color:#99640b;background:#fff1d3}.BLOCK{color:var(--red);background:#fde9e8}
-.score{font-size:42px;font-weight:850;line-height:1.1}.muted{color:var(--muted)}.empty{padding:30px 8px;text-align:center;color:var(--muted)}
-.reason{padding:10px 12px;margin:8px 0;border-radius:8px;background:#f6f8f8;border-left:3px solid #a8bbb4}.smallhead{font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.08em;margin:20px 0 8px}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f7f9f8;padding:12px;border-radius:8px}
-.event{padding:11px 0;border-bottom:1px solid #edf1f0;font-size:13px}.event:last-child{border-bottom:0}
-footer{max-width:1180px;margin:0 auto 30px;padding:0 18px;color:var(--muted);font-size:12px}
-@media(max-width:820px){main{grid-template-columns:1fr}h1{font-size:26px}.grid{grid-template-columns:1fr}}
+:root {
+  --bg-dark: #070a0f;
+  --bg-surface: #0d121b;
+  --bg-card: #121824;
+  --bg-card-hover: #161f2e;
+  --border: #1e293b;
+  --border-focus: #38bdf8;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --emerald: #10b981;
+  --emerald-bg: rgba(16, 185, 129, 0.12);
+  --emerald-border: rgba(16, 185, 129, 0.35);
+  
+  --amber: #f59e0b;
+  --amber-bg: rgba(245, 158, 11, 0.12);
+  --amber-border: rgba(245, 158, 11, 0.35);
+  
+  --rose: #f43f5e;
+  --rose-bg: rgba(244, 63, 94, 0.12);
+  --rose-border: rgba(244, 63, 94, 0.35);
+  
+  --cyan: #06b6d4;
+  --cyan-bg: rgba(6, 182, 212, 0.1);
+  --cyan-border: rgba(6, 182, 212, 0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: radial-gradient(circle at 50% 0%, #111a2d 0%, var(--bg-dark) 55%);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: rgba(13, 18, 27, 0.85);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #06b6d4, #10b981);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+}
+.logo-icon svg { width: 18px; height: 18px; fill: #070a0f; }
+.brand-text h1 {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  line-height: 1.1;
+}
+.brand-text span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Preset Scenarios */
+.presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #090e17;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.presets-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 6px;
+}
+.preset-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.preset-btn:hover {
+  background: var(--bg-card);
+  color: #fff;
+  border-color: var(--border);
+}
+.preset-btn.active {
+  background: var(--cyan-bg);
+  color: var(--cyan);
+  border-color: var(--cyan-border);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.04em;
+}
+.badge-mock { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.badge-armed { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Main Layout */
+main {
+  max-width: 1540px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.command-grid {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(460px, 1.15fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Card Styles */
+.console-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.card-header {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title svg { width: 14px; height: 14px; fill: var(--cyan); }
+.card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* Upload Dropzone */
+.upload-container {
+  border: 1px dashed #334155;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(15, 23, 42, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.upload-container:hover, .upload-container.dragover {
+  border-color: var(--cyan);
+  background: var(--cyan-bg);
+}
+.upload-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.upload-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.upload-icon {
+  width: 32px;
+  height: 32px;
+  background: #1e293b;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.upload-icon svg { width: 16px; height: 16px; fill: var(--cyan); }
+.upload-text strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.upload-text span {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.upload-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.upload-btn:hover { background: #334155; color: #fff; }
+.upload-chip {
+  display: none;
+  background: #0f172a;
+  border: 1px solid var(--emerald-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #cbd5e1;
+  align-items: center;
+  justify-content: space-between;
+}
+.upload-chip.active { display: flex; }
+.upload-chip-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.upload-chip-tag {
+  background: var(--emerald-bg);
+  color: var(--emerald);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+}
+.upload-remove {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+}
+.upload-remove:hover { color: var(--rose); }
+
+/* Form Fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-full { grid-column: 1 / -1; }
+label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+label .required {
+  color: var(--cyan);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+input, select, textarea {
+  background: #0a0e17;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+textarea {
+  min-height: 52px;
+  resize: vertical;
+}
+select { cursor: pointer; }
+
+/* Security Switches */
+.switch-card {
+  background: #090e17;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.switch-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+.switch-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+
+/* Action Buttons */
+.button-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.25);
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+.btn-ghost:hover {
+  background: #334155;
+  color: #fff;
+}
+.btn-amber {
+  background: #271a06;
+  border-color: var(--amber-border);
+  color: var(--amber);
+}
+.btn-amber:hover {
+  background: #3d2806;
+}
+
+/* Right Panel: Decision & Monitor */
+.monitor-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 20px;
+  gap: 16px;
+  margin: auto 0;
+}
+.radar-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px dashed rgba(6, 182, 212, 0.4);
+  display: grid;
+  place-items: center;
+  animation: spin 18s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.radar-ring svg { width: 28px; height: 28px; fill: var(--cyan); }
+.monitor-ready h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.monitor-ready p {
+  color: var(--text-muted);
+  font-size: 12px;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+/* Active Evaluation Results */
+.result-container {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+.result-container.active { display: flex; }
+
+.decision-hero {
+  border-radius: 8px;
+  padding: 16px;
+  background: #090e17;
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.decision-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.decision-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.decision-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.decision-pill.ALLOW { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
+.decision-pill.REQUIRE_APPROVAL { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.decision-pill.BLOCK { background: var(--rose-bg); color: var(--rose); border: 1px solid var(--rose-border); }
+
+.score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.score-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+.score-tier {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.score-track {
+  width: 140px;
+  height: 5px;
+  background: #1e293b;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Intent Banner */
+.intent-banner {
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.intent-banner.matched {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid var(--emerald-border);
+  color: #a7f3d0;
+}
+.intent-banner.mismatch {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid var(--rose-border);
+  color: #fecdd3;
+}
+
+/* Rationale & Reasons */
+.section-subtitle {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.reasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.reason-card {
+  background: #090e17;
+  border: 1px solid #1e293b;
+  border-left: 3px solid #38bdf8;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+.reason-card.prohibited { border-left-color: var(--rose); }
+.reason-card.approval { border-left-color: var(--amber); }
+
+/* Required Controls */
+.controls-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.control-pill {
+  background: #162032;
+  border: 1px solid #2d3b55;
+  color: #93c5fd;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Execution Status Box */
+.execution-card {
+  background: #090e17;
+  border: 1px solid #253346;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.exec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.exec-status-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+.exec-message {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Bottom Audit Trail */
+.audit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.audit-table-wrap {
+  overflow-x: auto;
+}
+table.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+table.audit-table th {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+table.audit-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #162032;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+table.audit-table tr:last-child td { border-bottom: none; }
+table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
+.mono-cell { font-family: 'JetBrains Mono', monospace; }
+.target-pill {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e131d;
+  border: 1px solid var(--rose-border);
+  color: #fecdd3;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+.toast.active { display: block; }
+
+/* Responsive */
+@media (max-width: 1040px) {
+  .command-grid { grid-template-columns: 1fr; }
+  .presets-bar { display: none; }
+}
 </style>
 </head>
 <body>
-<header><div class="eyebrow">CONTEXT-AWARE AI ACTION CONTROL</div><h1>TRINETRA</h1><p>Validate intent. Authorise resources. Assess risk. Enforce policy. Verify outcomes.</p></header>
+
+<header>
+  <div class="brand-group">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+    </div>
+    <div class="brand-text">
+      <h1>TRINETRA</h1>
+      <span>AI Agent Action Safety Gateway</span>
+    </div>
+  </div>
+
+  <!-- Interactive 1-Click Demo Scenarios -->
+  <div class="presets-bar">
+    <span class="presets-label">⚡ Demo Presets:</span>
+    <button class="preset-btn" onclick="loadPreset('safe_summary')">Safe Summary (ALLOW)</button>
+    <button class="preset-btn" onclick="loadPreset('external_leak')">External Leak (BLOCK)</button>
+    <button class="preset-btn" onclick="loadPreset('high_impact_delete')">Org Delete (APPROVAL)</button>
+    <button class="preset-btn" onclick="loadPreset('unauth_tool')">Unauth Tool (BLOCK)</button>
+    <button class="preset-btn" onclick="loadPreset('verification_failure')">Verify Fail (SIMULATED)</button>
+  </div>
+
+  <div class="header-meta">
+    <span class="badge badge-mock">MOCK SANDBOX</span>
+    <span class="badge badge-armed"><span class="pulse-dot"></span> GATEWAY ARMED</span>
+  </div>
+</header>
+
 <main>
-<section class="card">
-<h2>Evaluate a proposed agent action</h2>
-<form id="form">
-<label>User's original request</label>
-<textarea id="user_request" required>Summarise the confidential report for me.</textarea>
-<label>Agent's stated goal</label>
-<input id="agent_goal" required value="Summarise the confidential report">
-<div class="grid">
-<div><label>Proposed action</label><select id="action_type"><option>read</option><option>summarize</option><option>email</option><option>export</option><option>share</option><option>delete</option><option>modify</option><option>upload</option></select></div>
-<div><label>Target / resource</label><input id="target" value="confidential-report.pdf" required></div>
-</div>
-<div class="grid">
-<div><label>Destination (if any)</label><select id="destination"><option value="">None</option><option>internal</option><option>external</option><option>public</option><option>unknown</option></select></div>
-<div><label>Data sensitivity</label><select id="data_sensitivity"><option>public</option><option>internal</option><option selected>confidential</option><option>restricted</option></select></div>
-</div>
-<div class="grid">
-<div><label>Action scope</label><select id="scope"><option>single</option><option>multiple</option><option>organization</option></select></div>
-<div><label>Reversibility</label><select id="reversible"><option value="true">Reversible</option><option value="false">Hard to reverse</option></select></div>
-</div>
-<label class="check"><input id="tool_authorized" type="checkbox" checked> Agent has permission to use this tool</label>
-<label class="check"><input id="simulate_verification_failure" type="checkbox"> Simulate a failed post-action verification</label>
-<div class="actions"><button type="button" onclick="evaluateAction()">Evaluate action</button><button class="secondary" type="button" onclick="runExecution(false)">Try execution</button><button class="secondary" type="button" onclick="runExecution(true)">Approve + execute</button></div>
-<p class="muted" style="font-size:12px">Demo uses mock actions only. It will not send email, change files, or access real business systems.</p>
-</form>
-</section>
-<section class="card">
-<h2>TRINETRA decision</h2><div id="result" class="empty">Submit an action to see the risk score, decision, and explanation.</div>
-<div class="smallhead">RECENT AUDIT EVENTS</div><div id="audit" class="muted">No events yet.</div>
-</section>
+  <div class="command-grid">
+    
+    <!-- LEFT PANEL: Action Inspector & Upload -->
+    <section class="console-card">
+      <div class="card-header">
+        <span class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+          Proposed Agent Action Formulation
+        </span>
+        <span class="badge" style="background:#1e293b; color:#94a3b8">STAGE 01 / PROPOSAL</span>
+      </div>
+      
+      <div class="card-body">
+        
+        <!-- Upload to Agent Workspace Component -->
+        <div class="upload-container" id="dropzone">
+          <input type="file" id="file_input" style="display:none" accept=".txt,.pdf,.json,.csv,.md,.log,.yaml,.yml,.docx,.xlsx" onchange="handleFileSelect(event)">
+          <div class="upload-flex">
+            <div class="upload-info">
+              <div class="upload-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+              </div>
+              <div class="upload-text">
+                <strong>Upload Document to Agent Workspace</strong>
+                <span>Drag & drop or browse .txt, .pdf, .json, .csv, .md (max 5MB)</span>
+              </div>
+            </div>
+            <button type="button" class="upload-btn" onclick="document.getElementById('file_input').click()">Browse File</button>
+          </div>
+          
+          <div class="upload-chip" id="upload_chip">
+            <div class="upload-chip-left">
+              <span>📄</span>
+              <span id="chip_filename">document.pdf</span>
+              <span class="upload-chip-tag" id="chip_size">14 KB</span>
+              <span style="color:var(--text-dim)" id="chip_hash">SHA: 7f3a...</span>
+            </div>
+            <button type="button" class="upload-remove" title="Remove staged file" onclick="clearUploadedFile()">✕</button>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <form id="action_form" onsubmit="event.preventDefault(); evaluatePolicy();">
+          <div class="form-grid">
+            <div class="field-group field-full">
+              <label for="user_request">User's Original Request <span class="required">Mandatory</span></label>
+              <textarea id="user_request" required rows="2" placeholder="e.g. Summarise the quarterly earnings report for me.">Summarise the confidential report for me.</textarea>
+            </div>
+
+            <div class="field-group field-full">
+              <label for="agent_goal">Agent's Stated Goal <span class="required">Mandatory</span></label>
+              <input id="agent_goal" required value="Summarise the confidential report" placeholder="What the agent intends to achieve">
+            </div>
+
+            <div class="field-group">
+              <label for="action_type">Proposed Action</label>
+              <select id="action_type">
+                <option value="read" selected>read (Inspect file / data)</option>
+                <option value="summarize">summarize (Synthesize content)</option>
+                <option value="email">email (Send email message)</option>
+                <option value="export">export (Download / dump data)</option>
+                <option value="share">share (Grant permission / link)</option>
+                <option value="delete">delete (Destroy / remove data)</option>
+                <option value="modify">modify (Alter / overwrite data)</option>
+                <option value="upload">upload (Stage new file)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="target">Target / Resource <span class="required">Resource ID</span></label>
+              <input id="target" value="confidential-report.pdf" required placeholder="File, directory, database table, or API target">
+            </div>
+
+            <div class="field-group">
+              <label for="destination">Destination</label>
+              <select id="destination">
+                <option value="" selected>None (Local workspace)</option>
+                <option value="internal">internal (Private network)</option>
+                <option value="external">external (External endpoint / partner)</option>
+                <option value="public">public (Public internet / cloud)</option>
+                <option value="unknown">unknown (Unverified host)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="data_sensitivity">Data Sensitivity Classification</label>
+              <select id="data_sensitivity">
+                <option value="public">public (Open knowledge)</option>
+                <option value="internal">internal (Non-sensitive internal)</option>
+                <option value="confidential" selected>confidential (Proprietary / business data)</option>
+                <option value="restricted">restricted (PII / credentials / critical)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="scope">Action Scope (Blast Radius)</label>
+              <select id="scope">
+                <option value="single" selected>single (Single file or row)</option>
+                <option value="multiple">multiple (Batch / directory)</option>
+                <option value="organization">organization (Global / multi-tenant)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="reversible">Reversibility</label>
+              <select id="reversible">
+                <option value="true" selected>Reversible (Can be rolled back)</option>
+                <option value="false">Non-reversible (Permanent change)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="switch-card" style="margin-top:12px;">
+            <label class="switch-item">
+              <input type="checkbox" id="tool_authorized" checked>
+              <span>Agent has valid tool execution authorization</span>
+            </label>
+            <label class="switch-item">
+              <input type="checkbox" id="simulate_verification_failure">
+              <span>Simulate post-execution state verification failure</span>
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button type="submit" class="btn btn-primary" id="btn_evaluate">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+              Evaluate Policy
+            </button>
+            <button type="button" class="btn btn-ghost" onclick="executeAction(false)">
+              Try Execution
+            </button>
+            <button type="button" class="btn btn-amber" onclick="executeAction(true)">
+              Approve &amp; Execute
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Safety Intelligence & Decision Engine -->
+    <section class="console-card">
+      <div class="card-header">
+        <span class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          Policy Enforcement &amp; Verification Telemetry
+        </span>
+        <span class="badge" id="request_id_badge" style="background:#1e293b; color:#94a3b8">AWAITING EVALUATION</span>
+      </div>
+
+      <div class="card-body">
+        
+        <!-- READY / UN-EVALUATED STATE -->
+        <div class="monitor-ready" id="ready_state">
+          <div class="radar-ring">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+          </div>
+          <h3>Policy Gateway Active &amp; Ready</h3>
+          <p>Configure an agent action on the left or click any <strong>⚡ Demo Preset</strong> above to evaluate policy enforcement, intent alignment, and risk scoring in real-time.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:380px;">
+            <span class="control-pill">🛡️ Hard Prohibitions Gate</span>
+            <span class="control-pill">🔑 Resource Authorization</span>
+            <span class="control-pill">🧭 Intent Alignment Engine</span>
+            <span class="control-pill">👤 High-Impact Approval Rules</span>
+            <span class="control-pill">📊 0–100 Deterministic Risk Meter</span>
+          </div>
+        </div>
+
+        <!-- EVALUATION RESULTS -->
+        <div class="result-container" id="result_container">
+          
+          <!-- Hero Decision & Score -->
+          <div class="decision-hero">
+            <div class="decision-left">
+              <span class="decision-label">POLICY GATE DECISION</span>
+              <div class="decision-pill" id="decision_badge">ALLOW</div>
+            </div>
+            <div class="score-box">
+              <div class="score-value" id="score_display">0 <span style="font-size:14px; font-weight:600; color:var(--text-dim)">/ 100</span></div>
+              <span class="score-tier" id="score_tier">MINIMAL RISK</span>
+              <div class="score-track">
+                <div class="score-fill" id="score_fill" style="width: 10%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Intent Status Banner -->
+          <div class="intent-banner matched" id="intent_banner">
+            <span id="intent_icon">✓</span>
+            <span id="intent_text">Intent Check: Proposal matches user request intent.</span>
+          </div>
+
+          <!-- Explainable Rationale -->
+          <div>
+            <div class="section-subtitle">EXPLAINABLE POLICY RATIONALE</div>
+            <div class="reasons-list" id="reasons_container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Required Security Controls -->
+          <div id="controls_section" style="display:none;">
+            <div class="section-subtitle">MANDATORY ENFORCED CONTROLS</div>
+            <div class="controls-wrap" id="controls_container"></div>
+          </div>
+
+          <!-- Execution & Outcome Verification -->
+          <div class="execution-card" id="execution_card" style="display:none;">
+            <div class="exec-header">
+              <span class="section-subtitle" style="margin:0">EXECUTION &amp; VERIFICATION TELEMETRY</span>
+              <span class="badge" id="exec_status_badge">EXECUTED_IN_MOCK</span>
+            </div>
+            <p class="exec-message" id="exec_message">Mock action executed and post-action state check passed.</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- BOTTOM SECTION: Real-Time Security Audit Trail -->
+  <section class="audit-card">
+    <div class="card-header">
+      <span class="card-title">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        Real-Time Security Audit Trail
+      </span>
+      <button class="upload-btn" style="padding:3px 8px; font-size:10px" onclick="loadAudit()">Refresh Audit Log</button>
+    </div>
+    <div class="audit-table-wrap">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Time (UTC)</th>
+            <th>Decision</th>
+            <th>Action</th>
+            <th>Target Resource</th>
+            <th>Execution Status</th>
+            <th>Risk Score</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody id="audit_tbody">
+          <tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-dim)">Loading security events...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </main>
-<footer>Prototype / synthetic demonstration only. Deterministic rules are explainable but not a substitute for production policy design, security testing, or human governance.</footer>
+
+<div class="toast" id="toast_msg"></div>
+
 <script>
-let latest = null;
-function val(id){return document.getElementById(id).value}
-function payload(){return {user_request:val('user_request'),agent_goal:val('agent_goal'),action_type:val('action_type'),target:val('target'),destination:val('destination')||null,data_sensitivity:val('data_sensitivity'),scope:val('scope'),reversible:val('reversible')==='true',tool_authorized:document.getElementById('tool_authorized').checked,simulate_verification_failure:document.getElementById('simulate_verification_failure').checked}}
-async function evaluateAction(){const r=await fetch('/api/evaluate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});const d=await r.json();latest=d;render(d);loadAudit()}
-function render(d,execution=null){let html=`<div class="pill ${d.decision}">${d.decision.replace('_',' ')}</div><div class="score" style="margin-top:12px">${d.risk_score}<span style="font-size:14px;font-weight:600;color:#65727e"> / 100 risk</span></div><p>${d.intent_match?'Intent check: no mismatch detected':'Intent check: MISMATCH DETECTED'}</p>`;
-html+='<div class="smallhead">WHY THIS DECISION?</div>'+d.reasons.map(x=>`<div class="reason">${esc(x)}</div>`).join('');
-if(d.required_controls?.length)html+='<div class="smallhead">REQUIRED CONTROLS</div>'+d.required_controls.map(x=>`<div class="reason">${esc(x)}</div>`).join('');
-if(execution)html+=`<div class="smallhead">EXECUTION / VERIFICATION</div><div class="reason"><b>${esc(execution.status)}</b><br>${esc(execution.message)}</div>`;
-document.getElementById('result').className='';document.getElementById('result').innerHTML=html}
-async function runExecution(approved){const p=payload();const r=await fetch('/api/execute?approved='+approved,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();const e={decision:d.decision,risk_score:d.risk_score,intent_match:d.intent_match,reasons:d.reasons,required_controls:[]};render(e,d);loadAudit()}
-async function loadAudit(){const r=await fetch('/api/audit');const d=await r.json();document.getElementById('audit').innerHTML=d.events.length?d.events.slice(0,6).map(e=>`<div class="event"><span class="pill ${e.decision}">${e.decision}</span> <b>${esc(e.action_type)}</b> → ${esc(e.target)}<br><span class="muted">${esc(e.status||'EVALUATED')} · risk ${e.risk_score} · ${new Date(e.timestamp).toLocaleTimeString()}</span></div>`).join(''):'No events yet.'}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// Preset Scenarios
+const PRESETS = {
+  safe_summary: {
+    user_request: "Summarise the quarterly earnings document for me.",
+    agent_goal: "Summarise quarterly earnings document",
+    action_type: "read",
+    target: "quarterly_earnings.txt",
+    destination: "",
+    data_sensitivity: "internal",
+    scope: "single",
+    reversible: "true",
+    tool_authorized: true,
+    simulate_verification_failure: false
+  },
+  external_leak: {
+    user_request: "Summarise the confidential report for me.",
+    agent_goal: "Export confidential report to external server",
+    action_type: "email",
+    target: "confidential-report.pdf",
+    destination: "external",
+    data_sensitivity: "confidential",
+    scope: "single",
+    reversible: "true",
+    tool_authorized: true,
+    simulate_verification_failure: false
+  },
+  high_impact_delete: {
+    user_request: "Clean up the old project directory.",
+    agent_goal: "Delete old project archive files across organization",
+    action_type: "delete",
+    target: "company-archive-2025/",
+    destination: "",
+    data_sensitivity: "restricted",
+    scope: "organization",
+    reversible: "false",
+    tool_authorized: true,
+    simulate_verification_failure: false
+  },
+  unauth_tool: {
+    user_request: "Read the public announcements file.",
+    agent_goal: "Read public announcements",
+    action_type: "read",
+    target: "announcements.txt",
+    destination: "",
+    data_sensitivity: "public",
+    scope: "single",
+    reversible: "true",
+    tool_authorized: false,
+    simulate_verification_failure: false
+  },
+  verification_failure: {
+    user_request: "Read the daily system summary.",
+    agent_goal: "Read system summary",
+    action_type: "read",
+    target: "system_summary.log",
+    destination: "",
+    data_sensitivity: "internal",
+    scope: "single",
+    reversible: "true",
+    tool_authorized: true,
+    simulate_verification_failure: true
+  }
+};
+
+function val(id) { return document.getElementById(id).value; }
+function setVal(id, v) { document.getElementById(id).value = v; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast_msg');
+  t.textContent = msg;
+  t.classList.add('active');
+  setTimeout(() => t.classList.remove('active'), 4000);
+}
+
+function loadPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  setVal('user_request', p.user_request);
+  setVal('agent_goal', p.agent_goal);
+  setVal('action_type', p.action_type);
+  setVal('target', p.target);
+  setVal('destination', p.destination);
+  setVal('data_sensitivity', p.data_sensitivity);
+  setVal('scope', p.scope);
+  setVal('reversible', p.reversible);
+  document.getElementById('tool_authorized').checked = p.tool_authorized;
+  document.getElementById('simulate_verification_failure').checked = p.simulate_verification_failure;
+  evaluatePolicy();
+}
+
+function getPayload() {
+  return {
+    user_request: val('user_request'),
+    agent_goal: val('agent_goal'),
+    action_type: val('action_type'),
+    target: val('target'),
+    destination: val('destination') || null,
+    data_sensitivity: val('data_sensitivity'),
+    scope: val('scope'),
+    reversible: val('reversible') === 'true',
+    tool_authorized: document.getElementById('tool_authorized').checked,
+    simulate_verification_failure: document.getElementById('simulate_verification_failure').checked
+  };
+}
+
+// Upload Handling
+const dropzone = document.getElementById('dropzone');
+['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, (evt) => { evt.preventDefault(); dropzone.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, (evt) => { evt.preventDefault(); dropzone.classList.remove('dragover'); }));
+dropzone.addEventListener('drop', (evt) => {
+  const files = evt.dataTransfer.files;
+  if (files && files.length) uploadFile(files[0]);
+});
+
+function handleFileSelect(evt) {
+  const files = evt.target.files;
+  if (files && files.length) uploadFile(files[0]);
+}
+
+async function uploadFile(file) {
+  try {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Upload failed');
+    }
+
+    const data = await res.json();
+    setVal('target', data.filename);
+    
+    // Show chip
+    document.getElementById('chip_filename').textContent = data.filename;
+    document.getElementById('chip_size').textContent = (data.size_bytes / 1024).toFixed(1) + ' KB';
+    document.getElementById('chip_hash').textContent = 'SHA: ' + data.sha256.slice(0, 8) + '...';
+    document.getElementById('upload_chip').classList.add('active');
+
+    showToast(`File "${data.filename}" staged in mock workspace`);
+    loadAudit();
+  } catch (err) {
+    showToast('Upload error: ' + err.message);
+  }
+}
+
+function clearUploadedFile() {
+  document.getElementById('file_input').value = '';
+  document.getElementById('upload_chip').classList.remove('active');
+}
+
+// API Calls
+async function evaluatePolicy() {
+  try {
+    const payload = getPayload();
+    const res = await fetch('/api/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Evaluation request failed (' + res.status + ')');
+    const data = await res.json();
+    renderEvaluation(data);
+    loadAudit();
+  } catch (err) {
+    showToast('Error: ' + err.message);
+  }
+}
+
+async function executeAction(approved) {
+  try {
+    const payload = getPayload();
+    const res = await fetch('/api/execute?approved=' + approved, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Execution request failed (' + res.status + ')');
+    const data = await res.json();
+    
+    // Render full evaluation results and execution box
+    const evalData = {
+      request_id: data.request_id,
+      decision: data.decision,
+      risk_score: data.risk_score,
+      intent_match: data.intent_match,
+      reasons: data.reasons,
+      required_controls: data.required_controls || []
+    };
+    renderEvaluation(evalData, data);
+    loadAudit();
+  } catch (err) {
+    showToast('Execution error: ' + err.message);
+  }
+}
+
+function renderEvaluation(d, execution = null) {
+  document.getElementById('ready_state').style.display = 'none';
+  document.getElementById('result_container').classList.add('active');
+  document.getElementById('request_id_badge').textContent = 'ID: ' + d.request_id;
+
+  // Decision Pill
+  const pill = document.getElementById('decision_badge');
+  pill.className = 'decision-pill ' + d.decision;
+  pill.textContent = d.decision.replace('_', ' ');
+
+  // Risk Score & Tier
+  const score = Math.max(0, Math.min(100, d.risk_score));
+  document.getElementById('score_display').innerHTML = `${score} <span style="font-size:14px; font-weight:600; color:var(--text-dim)">/ 100</span>`;
+  const fill = document.getElementById('score_fill');
+  fill.style.width = score + '%';
+  
+  const tier = document.getElementById('score_tier');
+  if (score >= 65) {
+    tier.textContent = 'HIGH RISK (CRITICAL)';
+    tier.style.color = 'var(--rose)';
+    fill.style.background = 'var(--rose)';
+  } else if (score >= 30) {
+    tier.textContent = 'MODERATE RISK';
+    tier.style.color = 'var(--amber)';
+    fill.style.background = 'var(--amber)';
+  } else {
+    tier.textContent = 'LOW RISK';
+    tier.style.color = 'var(--emerald)';
+    fill.style.background = 'var(--emerald)';
+  }
+
+  // Intent Banner
+  const ib = document.getElementById('intent_banner');
+  if (d.intent_match) {
+    ib.className = 'intent-banner matched';
+    document.getElementById('intent_icon').textContent = '✓';
+    document.getElementById('intent_text').textContent = 'Intent Verified: Proposal directly aligns with user request.';
+  } else {
+    ib.className = 'intent-banner mismatch';
+    document.getElementById('intent_icon').textContent = '✕';
+    document.getElementById('intent_text').textContent = 'Intent Mismatch Detected: Agent proposal deviates from user consent.';
+  }
+
+  // Reasons
+  const reasonsBox = document.getElementById('reasons_container');
+  reasonsBox.innerHTML = (d.reasons || []).map(r => {
+    let cls = 'reason-card';
+    if (r.includes('Prohibited') || r.includes('BLOCK') || r.includes('denied')) cls += ' prohibited';
+    if (r.includes('High-impact') || r.includes('approval')) cls += ' approval';
+    return `<div class="${cls}">${escapeHtml(r)}</div>`;
+  }).join('') || '<div class="reason-card">No explanation returned.</div>';
+
+  // Controls
+  const ctrlSec = document.getElementById('controls_section');
+  if (d.required_controls && d.required_controls.length > 0) {
+    ctrlSec.style.display = 'block';
+    document.getElementById('controls_container').innerHTML = d.required_controls.map(c => 
+      `<span class="control-pill">🛡️ ${escapeHtml(c)}</span>`
+    ).join('');
+  } else {
+    ctrlSec.style.display = 'none';
+  }
+
+  // Execution card
+  const execCard = document.getElementById('execution_card');
+  if (execution) {
+    execCard.style.display = 'flex';
+    const stBadge = document.getElementById('exec_status_badge');
+    stBadge.textContent = execution.status;
+    if (execution.status === 'EXECUTED_IN_MOCK') {
+      stBadge.style.background = 'var(--emerald-bg)';
+      stBadge.style.color = 'var(--emerald)';
+    } else if (execution.status === 'EXECUTED_BUT_UNVERIFIED') {
+      stBadge.style.background = 'var(--rose-bg)';
+      stBadge.style.color = 'var(--rose)';
+    } else {
+      stBadge.style.background = 'var(--amber-bg)';
+      stBadge.style.color = 'var(--amber)';
+    }
+    document.getElementById('exec_message').textContent = execution.message;
+  } else {
+    execCard.style.display = 'none';
+  }
+}
+
+async function loadAudit() {
+  try {
+    const res = await fetch('/api/audit');
+    if (!res.ok) return;
+    const data = await res.json();
+    const events = data.events || [];
+    const tbody = document.getElementById('audit_tbody');
+    
+    if (events.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-dim)">No security events recorded yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = events.slice(0, 10).map(e => {
+      const pillClass = e.decision || 'ALLOW';
+      const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '—';
+      const outcome = e.verified === true ? '✓ Verified' : (e.verified === false ? '✕ Unverified' : '—');
+      return `
+        <tr>
+          <td class="mono-cell" style="color:var(--text-dim)">${timeStr}</td>
+          <td><span class="badge ${pillClass === 'ALLOW' ? 'badge-armed' : (pillClass === 'BLOCK' ? 'badge' : 'badge-mock')}" style="${pillClass === 'BLOCK' ? 'background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-border)' : ''}">${e.decision}</span></td>
+          <td><strong>${escapeHtml(e.action_type)}</strong></td>
+          <td><span class="target-pill mono-cell" title="${escapeHtml(e.target)}">${escapeHtml(e.target)}</span></td>
+          <td class="mono-cell" style="font-size:10px">${escapeHtml(e.status || 'EVALUATED')}</td>
+          <td class="mono-cell">${e.risk_score !== undefined ? e.risk_score + '/100' : '—'}</td>
+          <td style="${e.verified === false ? 'color:var(--rose); font-weight:700' : (e.verified === true ? 'color:var(--emerald)' : '')}">${outcome}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Audit fetch error:', err);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+loadAudit();
 </script>
-</body></html>
+</body>
+</html>

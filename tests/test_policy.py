@@ -244,3 +244,44 @@ def test_clear_explainable_policy_reasons_returned():
     assert any("[Resource Authorisation]" in r for r in result["reasons"])
     assert any("[Risk Assessment]" in r for r in result["reasons"])
     assert any("[Policy Enforcement]" in r for r in result["reasons"])
+
+
+# --- 9. Upload & Staging Security ---
+
+def test_upload_valid_document():
+    res = client.post(
+        "/api/upload",
+        content=b"Sample quarterly financial statement.",
+        headers={"x-filename": "financial_statement.pdf", "content-type": "application/pdf"}
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "ok"
+    assert data["filename"] == "financial_statement.pdf"
+    assert data["size_bytes"] == len(b"Sample quarterly financial statement.")
+    assert len(data["sha256"]) == 64
+
+
+def test_upload_prohibited_extension_rejected():
+    res = client.post(
+        "/api/upload",
+        content=b"#!/bin/bash\necho 'exploit'",
+        headers={"x-filename": "exploit.sh", "content-type": "text/x-sh"}
+    )
+    assert res.status_code == 400
+    assert "prohibited" in res.json()["detail"].lower()
+
+
+def test_upload_does_not_expose_content_in_audit_log():
+    secret_marker = "SUPER_SECRET_PAYLOAD_MARKER_9988"
+    client.post(
+        "/api/upload",
+        content=f"Confidential data: {secret_marker}".encode(),
+        headers={"x-filename": "confidential_memo.txt", "content-type": "text/plain"}
+    )
+    audit = client.get("/api/audit").json()
+    latest_event = audit["events"][0]
+    assert latest_event["action_type"] == "upload"
+    assert latest_event["target"] == "confidential_memo.txt"
+    assert secret_marker not in str(latest_event)
+
