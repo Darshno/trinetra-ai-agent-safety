@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRINETRA | AI Agent Safety Gateway</title>
+<style>
+:root{--ink:#182633;--muted:#65727e;--green:#176b52;--gold:#c58c27;--red:#c83c37;--line:#dbe4e1;--paper:#f7f9f8}
+*{box-sizing:border-box}body{margin:0;background:#eef2f3;color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:26px max(24px,calc((100vw - 1180px)/2));background:#fff;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;font-size:12px}h1{margin:5px 0 4px;font-size:32px}header p{margin:0;color:var(--muted)}
+main{max-width:1180px;margin:24px auto;padding:0 18px;display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,.9fr);gap:20px}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 5px 18px #1b344008}h2{font-size:18px;margin:0 0 15px}label{display:block;font-size:12px;font-weight:750;color:#475663;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid #cdd8d5;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:72px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;align-items:center;gap:8px;margin:12px 0;color:#43525d}.check input{width:auto}
+button{border:0;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer;background:var(--green);color:white}button.secondary{background:#eaf2ef;color:var(--green);border:1px solid #c8ddd5}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.pill{display:inline-block;border-radius:999px;padding:5px 10px;font-weight:850;font-size:12px;background:#eef2f3}.ALLOW{color:var(--green);background:#e4f5ed}.REQUIRE_APPROVAL{color:#99640b;background:#fff1d3}.BLOCK{color:var(--red);background:#fde9e8}
+.score{font-size:42px;font-weight:850;line-height:1.1}.muted{color:var(--muted)}.empty{padding:30px 8px;text-align:center;color:var(--muted)}
+.reason{padding:10px 12px;margin:8px 0;border-radius:8px;background:#f6f8f8;border-left:3px solid #a8bbb4}.smallhead{font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.08em;margin:20px 0 8px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#f7f9f8;padding:12px;border-radius:8px}
+.event{padding:11px 0;border-bottom:1px solid #edf1f0;font-size:13px}.event:last-child{border-bottom:0}
+footer{max-width:1180px;margin:0 auto 30px;padding:0 18px;color:var(--muted);font-size:12px}
+@media(max-width:820px){main{grid-template-columns:1fr}h1{font-size:26px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">CONTEXT-AWARE AI ACTION CONTROL</div><h1>TRINETRA</h1><p>Validate intent. Authorise resources. Assess risk. Enforce policy. Verify outcomes.</p></header>
+<main>
+<section class="card">
+<h2>Evaluate a proposed agent action</h2>
+<form id="form">
+<label>User's original request</label>
+<textarea id="user_request" required>Summarise the confidential report for me.</textarea>
+<label>Agent's stated goal</label>
+<input id="agent_goal" required value="Summarise the confidential report">
+<div class="grid">
+<div><label>Proposed action</label><select id="action_type"><option>read</option><option>summarize</option><option>email</option><option>export</option><option>share</option><option>delete</option><option>modify</option><option>upload</option></select></div>
+<div><label>Target / resource</label><input id="target" value="confidential-report.pdf" required></div>
+</div>
+<div class="grid">
+<div><label>Destination (if any)</label><select id="destination"><option value="">None</option><option>internal</option><option>external</option><option>public</option><option>unknown</option></select></div>
+<div><label>Data sensitivity</label><select id="data_sensitivity"><option>public</option><option>internal</option><option selected>confidential</option><option>restricted</option></select></div>
+</div>
+<div class="grid">
+<div><label>Action scope</label><select id="scope"><option>single</option><option>multiple</option><option>organization</option></select></div>
+<div><label>Reversibility</label><select id="reversible"><option value="true">Reversible</option><option value="false">Hard to reverse</option></select></div>
+</div>
+<label class="check"><input id="tool_authorized" type="checkbox" checked> Agent has permission to use this tool</label>
+<label class="check"><input id="simulate_verification_failure" type="checkbox"> Simulate a failed post-action verification</label>
+<div class="actions"><button type="button" onclick="evaluateAction()">Evaluate action</button><button class="secondary" type="button" onclick="runExecution(false)">Try execution</button><button class="secondary" type="button" onclick="runExecution(true)">Approve + execute</button></div>
+<p class="muted" style="font-size:12px">Demo uses mock actions only. It will not send email, change files, or access real business systems.</p>
+</form>
+</section>
+<section class="card">
+<h2>TRINETRA decision</h2><div id="result" class="empty">Submit an action to see the risk score, decision, and explanation.</div>
+<div class="smallhead">RECENT AUDIT EVENTS</div><div id="audit" class="muted">No events yet.</div>
+</section>
+</main>
+<footer>Prototype / synthetic demonstration only. Deterministic rules are explainable but not a substitute for production policy design, security testing, or human governance.</footer>
+<script>
+let latest = null;
+function val(id){return document.getElementById(id).value}
+function payload(){return {user_request:val('user_request'),agent_goal:val('agent_goal'),action_type:val('action_type'),target:val('target'),destination:val('destination')||null,data_sensitivity:val('data_sensitivity'),scope:val('scope'),reversible:val('reversible')==='true',tool_authorized:document.getElementById('tool_authorized').checked,simulate_verification_failure:document.getElementById('simulate_verification_failure').checked}}
+async function evaluateAction(){const r=await fetch('/api/evaluate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});const d=await r.json();latest=d;render(d);loadAudit()}
+function render(d,execution=null){let html=`<div class="pill ${d.decision}">${d.decision.replace('_',' ')}</div><div class="score" style="margin-top:12px">${d.risk_score}<span style="font-size:14px;font-weight:600;color:#65727e"> / 100 risk</span></div><p>${d.intent_match?'Intent check: no mismatch detected':'Intent check: MISMATCH DETECTED'}</p>`;
+html+='<div class="smallhead">WHY THIS DECISION?</div>'+d.reasons.map(x=>`<div class="reason">${esc(x)}</div>`).join('');
+if(d.required_controls?.length)html+='<div class="smallhead">REQUIRED CONTROLS</div>'+d.required_controls.map(x=>`<div class="reason">${esc(x)}</div>`).join('');
+if(execution)html+=`<div class="smallhead">EXECUTION / VERIFICATION</div><div class="reason"><b>${esc(execution.status)}</b><br>${esc(execution.message)}</div>`;
+document.getElementById('result').className='';document.getElementById('result').innerHTML=html}
+async function runExecution(approved){const p=payload();const r=await fetch('/api/execute?approved='+approved,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await r.json();const e={decision:d.decision,risk_score:d.risk_score,intent_match:d.intent_match,reasons:d.reasons,required_controls:[]};render(e,d);loadAudit()}
+async function loadAudit(){const r=await fetch('/api/audit');const d=await r.json();document.getElementById('audit').innerHTML=d.events.length?d.events.slice(0,6).map(e=>`<div class="event"><span class="pill ${e.decision}">${e.decision}</span> <b>${esc(e.action_type)}</b> → ${esc(e.target)}<br><span class="muted">${esc(e.status||'EVALUATED')} · risk ${e.risk_score} · ${new Date(e.timestamp).toLocaleTimeString()}</span></div>`).join(''):'No events yet.'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body></html>
