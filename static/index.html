@@ -4,1259 +4,2036 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="TRINETRA — Context-aware AI agent action safety gateway. Evaluate, approve, and audit AI agent actions with deterministic policy enforcement.">
-<title>TRINETRA | AI Agent Action Safety Gateway</title>
+<title>TRINETRA | Autonomous Agents. Accountable Actions.</title>
+
+<!-- Fonts: Inter & DM Mono from Google Fonts, Font Awesome 6.5.2, and BubbledotICG-FinePos from OnlineWebFonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Silkscreen&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <style>
+/* OnlineWebFonts BubbledotICG-FinePos CDN */
+@font-face {
+  font-family: "BubbledotICG-FinePos";
+  src: url("https://db.onlinewebfonts.com/t/8cb707a9b8a73f8a7403336b861c3074.eot");
+  src: url("https://db.onlinewebfonts.com/t/8cb707a9b8a73f8a7403336b861c3074.eot?#iefix") format("embedded-opentype"),
+       url("https://db.onlinewebfonts.com/t/8cb707a9b8a73f8a7403336b861c3074.woff2") format("woff2"),
+       url("https://db.onlinewebfonts.com/t/8cb707a9b8a73f8a7403336b861c3074.woff") format("woff"),
+       url("https://db.onlinewebfonts.com/t/8cb707a9b8a73f8a7403336b861c3074.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --bg-dark: #070a0f;
-  --bg-surface: #0d121b;
-  --bg-card: #121824;
-  --bg-card-hover: #161f2e;
-  --border: #1e293b;
-  --border-focus: #38bdf8;
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
-  
-  --emerald: #10b981;
-  --emerald-bg: rgba(16, 185, 129, 0.12);
-  --emerald-border: rgba(16, 185, 129, 0.35);
-  
-  --amber: #f59e0b;
-  --amber-bg: rgba(245, 158, 11, 0.12);
-  --amber-border: rgba(245, 158, 11, 0.35);
-  
-  --rose: #f43f5e;
-  --rose-bg: rgba(244, 63, 94, 0.12);
-  --rose-border: rgba(244, 63, 94, 0.35);
-  
-  --cyan: #06b6d4;
-  --cyan-bg: rgba(6, 182, 212, 0.1);
-  --cyan-border: rgba(6, 182, 212, 0.3);
+  color-scheme: dark;
+  --bg-black: #000000;
+  --bg-deep: #07090d;
+  --bg-panel: #0d1218;
+  --bg-panel-subtle: #080c10;
+  --bg-surface: #131a23;
+  --bg-surface-hover: #192330;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.16);
+  --border-focus: rgba(255, 255, 255, 0.35);
+
+  --text-main: #edf2f7;
+  --text-muted: #8c9cae;
+  --text-dim: #556677;
+  --text-white: #ffffff;
+
+  /* Restrained status accents */
+  --green: #51e0ad;
+  --green-bg: rgba(81, 224, 173, 0.12);
+  --green-border: rgba(81, 224, 173, 0.3);
+
+  --amber: #ffc66d;
+  --amber-bg: rgba(255, 198, 109, 0.12);
+  --amber-border: rgba(255, 198, 109, 0.3);
+
+  --red: #ff777f;
+  --red-bg: rgba(255, 119, 127, 0.12);
+  --red-border: rgba(255, 119, 127, 0.3);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-dot: 'BubbledotICG-FinePos', 'Silkscreen', 'DM Mono', monospace;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background: radial-gradient(ellipse 80% 50% at 50% -10%, #111a2d 0%, var(--bg-dark) 60%);
-  color: var(--text-main);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  font-size: 13px;
-  line-height: 1.55;
-  min-height: 100vh;
+* {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-/* ─── Header ─── */
-header {
-  background: rgba(13, 18, 27, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 28px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-.brand-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.logo-icon {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, #06b6d4, #10b981);
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
-  transition: box-shadow 0.3s ease;
-}
-.logo-icon:hover { box-shadow: 0 0 28px rgba(6, 182, 212, 0.5); }
-.logo-icon svg { width: 18px; height: 18px; fill: #070a0f; }
-.brand-text h1 {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: #fff;
-  line-height: 1.15;
-}
-.brand-text span {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-black);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
-/* Preset Scenarios */
-.presets-bar {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(9, 14, 23, 0.9);
-  padding: 4px 6px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  flex-shrink: 1;
-  overflow-x: auto;
-}
-.presets-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0 8px;
-  white-space: nowrap;
-}
-.preset-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 11px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-.preset-btn:hover {
-  background: var(--bg-card);
-  color: #fff;
-  border-color: var(--border);
-  transform: translateY(-1px);
-}
-.preset-btn.active {
-  background: var(--cyan-bg);
-  color: var(--cyan);
-  border-color: var(--cyan-border);
-}
-
-.header-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-.badge-mock { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
-.badge-armed { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
-.pulse-dot {
+/* Custom Scrollbars */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 8px currentColor;
-  animation: pulse-glow 2s ease-in-out infinite;
 }
-@keyframes pulse-glow {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
-  50% { opacity: 0.5; box-shadow: 0 0 14px currentColor; }
+::-webkit-scrollbar-track {
+  background: var(--bg-black);
 }
-
-/* ─── Main Layout ─── */
-main {
-  max-width: 1560px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 24px 28px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  flex: 1;
-}
-
-.command-grid {
-  display: grid;
-  grid-template-columns: minmax(400px, 1fr) minmax(440px, 1.15fr);
-  gap: 24px;
-  align-items: start;
-}
-
-/* ─── Card Styles ─── */
-.console-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.02) inset;
-  transition: box-shadow 0.3s ease;
-}
-.console-card:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
-}
-.card-header {
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-.card-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-main);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.card-title svg { width: 15px; height: 15px; fill: var(--cyan); flex-shrink: 0; }
-.card-body {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1;
-}
-
-/* ─── Upload Dropzone ─── */
-.upload-container {
-  border: 2px dashed #334155;
-  border-radius: var(--radius-md);
-  padding: 16px 18px;
-  background: rgba(15, 23, 42, 0.35);
-  transition: all 0.25s ease;
-  position: relative;
-  cursor: pointer;
-}
-.upload-container:hover {
-  border-color: rgba(6, 182, 212, 0.5);
-  background: rgba(6, 182, 212, 0.04);
-}
-.upload-container.dragover {
-  border-color: var(--cyan);
-  background: var(--cyan-bg);
-  box-shadow: 0 0 24px rgba(6, 182, 212, 0.12);
-}
-.upload-container.upload-success {
-  border-color: var(--emerald);
-  border-style: solid;
-  background: rgba(16, 185, 129, 0.06);
-}
-.upload-container.upload-error {
-  border-color: var(--rose);
-  border-style: solid;
-  background: rgba(244, 63, 94, 0.06);
-  animation: shake 0.4s ease;
-}
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-4px); }
-  40%, 80% { transform: translateX(4px); }
-}
-.upload-flex {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-.upload-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.upload-icon {
-  width: 36px;
-  height: 36px;
-  background: #1e293b;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-.upload-container:hover .upload-icon { background: #253346; }
-.upload-icon svg { width: 16px; height: 16px; fill: var(--cyan); }
-.upload-text {
-  min-width: 0;
-}
-.upload-text strong {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 2px;
-}
-.upload-text span {
-  font-size: 10px;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-.upload-btn {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #e2e8f0;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.upload-btn:hover { background: #334155; color: #fff; transform: translateY(-1px); }
-.upload-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-/* Upload progress */
-.upload-progress {
-  display: none;
-  margin-top: 10px;
-  background: #0f172a;
-  border-radius: 6px;
-  padding: 10px 14px;
-  align-items: center;
-  gap: 10px;
-}
-.upload-progress.active { display: flex; }
-.upload-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #334155;
-  border-top-color: var(--cyan);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  flex-shrink: 0;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.upload-progress-text {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* Upload chip / staged file */
-.upload-chip {
-  display: none;
-  background: #0f172a;
-  border: 1px solid var(--emerald-border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-top: 10px;
-  font-size: 11px;
-  color: #cbd5e1;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  animation: fadeIn 0.3s ease;
-}
-@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-.upload-chip.active { display: flex; }
-.upload-chip-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  min-width: 0;
-  overflow: hidden;
-}
-.upload-chip-left span { white-space: nowrap; }
-.upload-chip-tag {
-  background: var(--emerald-bg);
-  color: var(--emerald);
-  padding: 2px 7px;
+::-webkit-scrollbar-thumb {
+  background: #1c2430;
   border-radius: 4px;
-  font-size: 9px;
-  font-weight: 700;
-  flex-shrink: 0;
 }
-.upload-remove {
-  background: transparent;
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3749;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
   border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: all 0.15s;
-  flex-shrink: 0;
+  background: transparent;
 }
-.upload-remove:hover { color: var(--rose); background: var(--rose-bg); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
 
-/* Upload error message */
-.upload-error-msg {
-  display: none;
-  margin-top: 10px;
-  background: rgba(244, 63, 94, 0.08);
-  border: 1px solid var(--rose-border);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #fecdd3;
-  align-items: center;
-  gap: 8px;
-  animation: fadeIn 0.3s ease;
-}
-.upload-error-msg.active { display: flex; }
-
-/* ─── Form Fields ─── */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-.field-group {
+/* ==========================================================================
+   EXPERIENCE 1: "Intelligence Designed To Evolve" LANDING PAGE
+   Matching the reference image specifications exactly
+   ========================================================================== */
+#landing-view {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-.field-full { grid-column: 1 / -1; }
-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  letter-spacing: 0.01em;
-}
-label .required {
-  color: var(--cyan);
-  font-size: 9px;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-input, select, textarea {
-  background: #0a0e17;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 12px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
-}
-input::placeholder, textarea::placeholder {
-  color: #475569;
-}
-textarea {
-  min-height: 56px;
-  resize: vertical;
-  line-height: 1.5;
-}
-select {
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 28px;
+  background: #000000;
+  z-index: 1;
 }
 
-/* ─── Security Switches ─── */
-.switch-card {
-  background: rgba(9, 14, 23, 0.8);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px 14px;
+/* Background Video Container */
+.hero-video-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  background: #000;
+}
+.hero-video-media {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  opacity: 1;
+}
+.hero-video-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 95% 85% at 50% 50%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* Landing Top Navigation Bar */
+.landing-topbar {
+  position: relative;
+  z-index: 20;
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* TRINETRA Brand Mark & Wordmark at Top-Left */
+.landing-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.landing-brand-lockup:hover {
+  opacity: 0.88;
+}
+
+/* White Circular Logo */
+.white-circle-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.white-circle-logo:hover,
+.landing-brand-lockup:hover .white-circle-logo {
+  transform: scale(1.05);
+}
+.circle-logo-text {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 900;
+  color: #000000;
+  letter-spacing: -0.02em;
+}
+
+.brand-wordmark {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+/* Hero Content Composition */
+.landing-hero-body {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.switch-item {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #cbd5e1;
-  cursor: pointer;
-  transition: color 0.15s;
-}
-.switch-item:hover { color: #fff; }
-.switch-item input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--cyan);
-  cursor: pointer;
-  flex-shrink: 0;
+  text-align: center;
+  padding: 0 24px;
+  max-width: 960px;
+  margin: auto auto 24px;
 }
 
-/* ─── Action Buttons ─── */
-.button-row {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 6px;
+/* Small Uppercase Eyebrow */
+.landing-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 18px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
 }
-.btn {
-  font-family: inherit;
-  font-size: 12px;
+
+/* White Dot-Matrix Headline (Existing Pixel Font) */
+.headline-dot-matrix {
+  font-family: var(--font-dot);
+  font-size: clamp(48px, 7vw, 92px);
+  line-height: 1.05;
+  color: #ffffff;
+  font-weight: normal;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 0.03em;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.85);
+}
+
+/* Supporting Headline */
+.landing-supporting-headline {
+  font-family: var(--font-sans);
+  font-size: clamp(17px, 2.1vw, 22px);
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  line-height: 1.35;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* Subtitle / Description */
+.landing-hero-subtitle {
+  font-family: var(--font-sans);
+  font-size: clamp(14px, 1.25vw, 15.5px);
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 680px;
+  line-height: 1.65;
+  margin-bottom: 34px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+}
+
+/* Pure White Pill Button */
+.white-get-started-btn {
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-sans);
+  font-size: 14px;
   font-weight: 700;
-  padding: 11px 14px;
-  border-radius: 8px;
-  border: 1px solid transparent;
+  padding: 14px 34px;
+  border-radius: 999px;
+  border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
+  gap: 10px;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 38px;
 }
-.btn:active { transform: scale(0.97); }
-.btn-primary {
-  background: linear-gradient(135deg, #0284c7, #06b6d4);
-  color: #fff;
-  box-shadow: 0 3px 14px rgba(6, 182, 212, 0.25);
-}
-.btn-primary:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
-}
-.btn-ghost {
-  background: #1e293b;
-  border-color: #334155;
-  color: #cbd5e1;
-}
-.btn-ghost:hover {
-  background: #334155;
-  color: #fff;
-  transform: translateY(-1px);
-}
-.btn-amber {
-  background: #271a06;
-  border-color: var(--amber-border);
-  color: var(--amber);
-}
-.btn-amber:hover {
-  background: #3d2806;
-  transform: translateY(-1px);
+.white-get-started-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.4);
+  background: #f4f4f4;
 }
 
-/* ─── Right Panel: Decision & Monitor ─── */
-.monitor-ready {
+/* Four Bottom Capabilities Strip */
+.landing-capabilities-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 880px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.capability-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 40px 24px;
-  gap: 18px;
-  margin: auto 0;
+  padding: 6px 8px;
 }
-.radar-ring {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  border: 2px dashed rgba(6, 182, 212, 0.35);
+.capability-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+.capability-item:hover .capability-label {
+  color: #ffffff;
+}
+
+/* Landing Bottom Spacer */
+.landing-bottom-spacer {
+  height: 24px;
+}
+
+@media (max-width: 820px) {
+  .landing-topbar {
+    padding: 24px 28px;
+  }
+  .landing-capabilities-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing-topbar {
+    padding: 20px 20px;
+  }
+  .landing-capabilities-strip {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+
+/* ==========================================================================
+   EXPERIENCE 2: FUNCTIONAL TRINETRA DASHBOARD
+   Redesigned to share the exact same clean, monochrome, flowing aesthetic
+   ========================================================================== */
+#dashboard-view {
+  display: none;
+  min-height: 100vh;
+  background-color: var(--bg-deep);
+  background-image: 
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(255, 255, 255, 0.03) 0%, transparent 70%),
+    linear-gradient(180deg, var(--bg-black) 0%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+}
+
+.dashboard-layout {
+  min-height: 100vh;
   display: grid;
-  place-items: center;
-  animation: spin 20s linear infinite;
+  grid-template-columns: 240px minmax(0, 1fr);
+  width: 100%;
 }
-.radar-ring svg { width: 28px; height: 28px; fill: var(--cyan); }
-.monitor-ready h3 {
-  font-size: 16px;
-  font-weight: 700;
+
+/* Sidebar */
+.dash-sidebar {
+  background: var(--bg-panel-subtle);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.dash-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+.dash-sidebar-header strong {
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  color: #fff;
+  line-height: 1.1;
+}
+.dash-sidebar-header small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.back-to-landing-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  margin: 0 4px;
+}
+.back-to-landing-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: var(--border-light);
+}
+
+.dash-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dash-nav-header {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.dash-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.dash-nav-link:hover {
+  background: var(--bg-panel);
   color: #fff;
 }
-.monitor-ready p {
-  color: var(--text-muted);
-  font-size: 12px;
-  max-width: 380px;
-  line-height: 1.6;
-}
-.capabilities-wrap {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 400px;
+.dash-nav-link.active {
+  background: var(--bg-surface);
+  color: #fff;
+  box-shadow: inset 2px 0 #fff;
 }
 
-/* ─── Active Evaluation Results ─── */
-.result-container {
-  display: none;
-  flex-direction: column;
-  gap: 16px;
-  animation: fadeIn 0.4s ease;
-}
-.result-container.active { display: flex; }
-
-.decision-hero {
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
-  background: rgba(9, 14, 23, 0.9);
+.sidebar-telemetry-card {
+  margin-top: auto;
   border: 1px solid var(--border);
+  background: var(--bg-panel);
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+.telemetry-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.pulse-circle {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--green);
+}
+.sidebar-telemetry-card p {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+/* Dashboard Content Area */
+.dash-content {
+  min-width: 0;
+  padding: 24px clamp(18px, 2.5vw, 36px);
+  max-width: 1680px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Dashboard Topbar */
+.dash-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
-.decision-left {
+.dash-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.dash-topbar h1 {
+  font-size: clamp(20px, 2vw, 25px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 3px 0 2px;
+}
+.dash-topbar .subtext {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.topbar-right-chips {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.decision-label {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-.decision-pill {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
-  font-weight: 800;
-  padding: 7px 16px;
-  border-radius: 8px;
-  letter-spacing: 0.06em;
-  display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
 }
-.decision-pill.ALLOW { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
-.decision-pill.REQUIRE_APPROVAL { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
-.decision-pill.BLOCK { background: var(--rose-bg); color: var(--rose); border: 1px solid var(--rose-border); }
-
-.score-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.score-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 34px;
-  font-weight: 800;
-  line-height: 1;
-}
-.score-tier {
+.top-chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: var(--text-muted);
   font-size: 10px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  background: var(--bg-panel-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.score-track {
-  width: 140px;
-  height: 5px;
-  background: #1e293b;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 4px;
-}
-.score-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.5s ease, background 0.5s ease;
+.top-chip.mock {
+  border-color: var(--amber-border);
+  background: var(--amber-bg);
+  color: var(--amber);
 }
 
-/* ─── Intent Banner ─── */
-.intent-banner {
-  border-radius: 8px;
-  padding: 11px 16px;
-  font-size: 12px;
+/* Presets Strip */
+.dash-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+.dash-presets-bar::-webkit-scrollbar {
+  display: none;
+}
+.presets-caption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.preset-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
   font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.preset-pill:hover {
+  background: var(--bg-surface-hover);
+  color: #fff;
+  border-color: var(--border-light);
+}
+.preset-pill.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+.outcome-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.out-allow { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.out-block { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+.out-approval { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.out-sim { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid var(--border); }
+
+/* Overview Grid */
+.dash-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.overview-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.box-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.box-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.box-val span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+}
+
+/* Two-Column Command Layout */
+.command-columns {
+  display: grid;
+  grid-template-columns: minmax(380px, 1.05fr) minmax(380px, 0.95fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.panel-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.panel-card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.015);
+}
+.card-head-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.card-head-step {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.panel-card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Upload Dropzone (Restrained, Elegant) */
+.dash-dropzone {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--bg-panel-subtle);
+  transition: all 0.2s ease;
+}
+.dash-dropzone:hover, .dash-dropzone.dragover {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.02);
+}
+.dropzone-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dropzone-details {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.intent-banner.matched {
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid var(--emerald-border);
-  color: #a7f3d0;
+.dropzone-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #fff;
 }
-.intent-banner.mismatch {
-  background: rgba(244, 63, 94, 0.08);
-  border: 1px solid var(--rose-border);
-  color: #fecdd3;
+.dropzone-txt strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.dropzone-txt span {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.dash-browse-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+.dash-browse-btn:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-light);
 }
 
-/* ─── Rationale & Reasons ─── */
-.section-subtitle {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-bottom: 8px;
+.dash-upload-chip {
+  display: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--green-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  align-items: center;
+  justify-content: space-between;
 }
-.reasons-list {
+.dash-upload-chip.active {
+  display: flex;
+}
+.chip-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-main);
+}
+.chip-tag-ok {
+  background: var(--green-bg);
+  color: var(--green);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+}
+.chip-remove-btn {
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 5px;
+}
+.chip-remove-btn:hover {
+  color: var(--red);
+}
+
+/* Form Fields */
+.form-2col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.form-group-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-span-all {
+  grid-column: 1 / -1;
+}
+.input-header-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.input-header-label span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+input[type="text"], select, textarea {
+  width: 100%;
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus, select:focus, textarea:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+textarea {
+  min-height: 52px;
+  resize: vertical;
+}
+
+/* Security Switches */
+.switches-wrapper {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.switch-item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.switch-item-row input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #fff;
+  cursor: pointer;
+}
+
+/* Form Action Buttons (Matching White Pill & Restrained Accent Style) */
+.form-buttons-row {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.15fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.action-pill-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+.btn-primary-white {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+}
+.btn-primary-white:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+.btn-secondary-ghost {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-main);
+}
+.btn-secondary-ghost:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-light);
+}
+.btn-approval-amber {
+  background: var(--amber-bg);
+  border-color: var(--amber-border);
+  color: var(--amber);
+}
+.btn-approval-amber:hover {
+  filter: brightness(1.15);
+}
+.action-pill-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* RIGHT PANEL: Decision & Telemetry */
+.idle-prompt-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  gap: 14px;
+  color: var(--text-muted);
+}
+.idle-shield-crest {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel-subtle);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--text-muted);
+}
+.idle-prompt-box h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.idle-prompt-box p {
+  font-size: 11px;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.eval-content-box {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+.eval-content-box.active {
+  display: flex;
+}
+
+/* Decision Summary Box */
+.decision-summary-hero {
+  padding: 16px;
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.decision-hero-left {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 200px;
+}
+.hero-assessment-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+.decision-status-pill {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+.decision-status-pill.ALLOW { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.decision-status-pill.REQUIRE_APPROVAL { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.decision-status-pill.BLOCK { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+.decision-hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.score-big-number {
+  font-family: var(--font-dot);
+  font-size: 34px;
+  font-weight: normal;
+  color: #fff;
+  line-height: 1;
+}
+.score-unit-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.score-meter-track {
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.score-meter-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* 4-Stage Sequential Policy Pipeline */
+.pipeline-module {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.pipeline-module-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.pipeline-kicker-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.pipeline-step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.pipe-step-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pipe-step-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.step-order-number {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.step-result-tag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.step-title-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.step-desc-text {
+  font-size: 9px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Threat Dimensions Breakdown */
+.threat-dimensions-module {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.dimensions-grid-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.dimension-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dim-card-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.dim-card-points {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.dim-card-sub {
+  font-size: 8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Reasons List */
+.reasons-scroll-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
   overflow-y: auto;
   padding-right: 4px;
 }
-.reason-card {
-  background: rgba(9, 14, 23, 0.8);
-  border: 1px solid #1e293b;
-  border-left: 3px solid #38bdf8;
-  padding: 10px 14px;
-  border-radius: 5px;
+.reason-card-item {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--text-muted);
+  padding: 8px 10px;
+  border-radius: 6px;
   font-size: 11px;
-  color: #cbd5e1;
   line-height: 1.5;
-  transition: background 0.15s;
+  color: #cbd5e1;
 }
-.reason-card:hover { background: rgba(15, 23, 42, 0.9); }
-.reason-card.prohibited { border-left-color: var(--rose); }
-.reason-card.approval { border-left-color: var(--amber); }
+.reason-card-item.danger { border-left-color: var(--red); }
+.reason-card-item.warning { border-left-color: var(--amber); }
 
-/* ─── Required Controls ─── */
-.controls-wrap {
+/* Controls Pills */
+.controls-pills-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 6px;
 }
-.control-pill {
-  background: #162032;
-  border: 1px solid #2d3b55;
-  color: #93c5fd;
+.control-chip-badge {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   font-size: 10px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
-/* ─── Execution Status Box ─── */
-.execution-card {
-  background: rgba(9, 14, 23, 0.8);
-  border: 1px solid #253346;
-  border-radius: 8px;
-  padding: 14px 16px;
+/* Execution Telemetry Card */
+.execution-card-block {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  animation: fadeIn 0.3s ease;
+  gap: 4px;
 }
-.exec-header {
+.exec-block-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
 }
-.exec-status-pill {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-}
-.exec-message {
+.exec-block-msg {
   font-size: 11px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
-/* ─── Bottom Audit Trail ─── */
-.audit-card {
-  background: var(--bg-card);
+/* SIEM Audit Trail */
+.audit-trail-card {
+  margin-top: 10px;
+}
+.audit-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.audit-tab-filter-group {
+  display: flex;
+  align-items: center;
+  background: var(--bg-panel-subtle);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  padding: 2px;
 }
-.audit-table-wrap {
+.tab-filter-btn {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tab-filter-btn.active {
+  background: var(--bg-surface);
+  color: #fff;
+}
+.audit-search-input-field {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px;
+  color: #fff;
+  font-size: 11px;
+  width: 170px;
+  outline: none;
+}
+.audit-search-input-field:focus {
+  border-color: var(--border-focus);
+}
+
+.audit-table-scroll {
   overflow-x: auto;
-  max-height: 380px;
-  overflow-y: auto;
+  max-height: 340px;
 }
-table.audit-table {
+table.audit-siem-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
   text-align: left;
 }
-table.audit-table th {
-  background: rgba(255, 255, 255, 0.02);
+table.audit-siem-table th {
+  background: var(--bg-panel-subtle);
   color: var(--text-dim);
-  font-weight: 700;
+  font-weight: 800;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 11px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 2;
-  background-color: var(--bg-card);
+  z-index: 5;
 }
-table.audit-table td {
-  padding: 10px 16px;
-  border-bottom: 1px solid #162032;
-  color: #cbd5e1;
+table.audit-siem-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
   vertical-align: middle;
 }
-table.audit-table tr:last-child td { border-bottom: none; }
-table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
-.mono-cell { font-family: 'JetBrains Mono', monospace; }
-.target-pill {
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
+table.audit-siem-table tr:hover td {
+  background: rgba(255, 255, 255, 0.015);
 }
-
-/* Audit empty state */
-.audit-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  gap: 10px;
-}
-.audit-empty-icon {
-  font-size: 28px;
-  opacity: 0.4;
-}
-.audit-empty p {
-  color: var(--text-dim);
-  font-size: 12px;
-  max-width: 300px;
-}
-
-/* ─── Toast ─── */
-.toast {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  padding: 13px 20px;
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  font-weight: 600;
-  display: none;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  z-index: 1000;
-  max-width: 420px;
-  animation: slideIn 0.3s ease;
-  backdrop-filter: blur(12px);
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.toast.active { display: block; }
-.toast.toast-error {
-  background: rgba(30, 19, 29, 0.95);
-  border: 1px solid var(--rose-border);
-  color: #fecdd3;
-}
-.toast.toast-success {
-  background: rgba(13, 27, 23, 0.95);
-  border: 1px solid var(--emerald-border);
-  color: #a7f3d0;
-}
-.toast.toast-info {
-  background: rgba(13, 23, 35, 0.95);
-  border: 1px solid var(--cyan-border);
-  color: #a5f3fc;
-}
-
-/* ─── Footer ─── */
-footer {
-  padding: 16px 28px;
-  text-align: center;
-  border-top: 1px solid var(--border);
-  background: rgba(13, 18, 27, 0.5);
-}
-footer p {
-  font-size: 11px;
-  color: var(--text-dim);
-  letter-spacing: 0.02em;
-}
-footer strong {
+.mono-log {
+  font-family: var(--font-mono);
+  font-size: 10px;
   color: var(--text-muted);
 }
-
-/* ─── Responsive ─── */
-@media (max-width: 1080px) {
-  .command-grid { grid-template-columns: 1fr; }
-  .presets-bar { display: none; }
-  header { padding: 12px 16px; }
-  main { padding: 16px; }
+.target-log-cell {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  color: #fff;
+}
+.inspect-pill-btn {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.inspect-pill-btn:hover {
+  background: var(--bg-surface);
+  color: #fff;
+  border-color: var(--border-focus);
 }
 
-@media (max-width: 640px) {
-  .button-row { grid-template-columns: 1fr; }
-  .form-grid { grid-template-columns: 1fr; }
-  .decision-hero { flex-direction: column; align-items: flex-start; }
-  .score-box { align-items: flex-start; }
-  .header-meta { display: none; }
+/* Event Detail Modal */
+.modal-overlay-wrap {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay-wrap.active {
+  display: flex;
+}
+.modal-window-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-focus);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 660px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+.modal-window-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-heading {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+.modal-close-icon {
+  color: var(--text-dim);
+  font-size: 18px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.modal-close-icon:hover {
+  color: #fff;
+}
+.modal-window-body {
+  padding: 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal-2col-kv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.kv-cell {
+  background: var(--bg-panel-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.kv-key-txt {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.kv-val-txt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+/* Toast */
+.dash-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-focus);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  display: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+}
+.dash-toast.active {
+  display: block;
+}
+
+@media (max-width: 1080px) {
+  .dashboard-layout {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+  .dash-sidebar {
+    padding: 20px 10px;
+  }
+  .dash-sidebar-header strong, .dash-sidebar-header small, .dash-nav-header, .dash-nav-link span, .back-to-landing-btn span, .sidebar-telemetry-card p {
+    display: none;
+  }
+  .dash-sidebar-header, .dash-nav-link, .back-to-landing-btn {
+    justify-content: center;
+  }
+  .command-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .dashboard-layout {
+    display: block;
+  }
+  .dash-sidebar {
+    display: none;
+  }
+  .dash-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-2col-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-buttons-row {
+    grid-template-columns: 1fr;
+  }
+  .dimensions-grid-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pipeline-step-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="brand-group">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+<!-- =========================================================================
+     EXPERIENCE 1: "Intelligence Designed To Evolve" LANDING PAGE
+     ========================================================================= -->
+<section id="landing-view">
+  
+  <!-- Flowing CloudFront Hero Video Background -->
+  <div class="hero-video-wrap">
+    <video class="hero-video-media" autoplay muted loop playsinline preload="auto">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4" type="video/mp4">
+    </video>
+    <div class="hero-video-scrim"></div>
+  </div>
+
+  <!-- Top Navigation Bar: Minimal, spacious, cinematic with only TRINETRA brand mark & wordmark -->
+  <header class="landing-topbar">
+    <div class="landing-brand-lockup" onclick="navigateToLanding()" title="TRINETRA Zero-Trust Security">
+      <div class="white-circle-logo">
+        <span class="circle-logo-text">T</span>
+      </div>
+      <span class="brand-wordmark">TRINETRA</span>
     </div>
-    <div class="brand-text">
-      <h1>TRINETRA</h1>
-      <span>AI Agent Action Safety Gateway</span>
-    </div>
-  </div>
+  </header>
 
-  <!-- Interactive 1-Click Demo Scenarios -->
-  <div class="presets-bar" id="presets_bar">
-    <span class="presets-label">⚡ Demo Presets:</span>
-    <button class="preset-btn" id="preset_safe_summary" onclick="loadPreset('safe_summary')">Safe Summary (ALLOW)</button>
-    <button class="preset-btn" id="preset_external_leak" onclick="loadPreset('external_leak')">External Leak (BLOCK)</button>
-    <button class="preset-btn" id="preset_high_impact_delete" onclick="loadPreset('high_impact_delete')">Org Delete (APPROVAL)</button>
-    <button class="preset-btn" id="preset_unauth_tool" onclick="loadPreset('unauth_tool')">Unauth Tool (BLOCK)</button>
-    <button class="preset-btn" id="preset_verification_failure" onclick="loadPreset('verification_failure')">Verify Fail (SIMULATED)</button>
-  </div>
-
-  <div class="header-meta">
-    <span class="badge badge-mock">MOCK SANDBOX</span>
-    <span class="badge badge-armed"><span class="pulse-dot"></span> GATEWAY ARMED</span>
-  </div>
-</header>
-
-<main>
-  <div class="command-grid">
+  <!-- Landing Hero Section: Pure TRINETRA Identity -->
+  <div class="landing-hero-body">
     
-    <!-- LEFT PANEL: Action Inspector & Upload -->
-    <section class="console-card">
-      <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
-          Proposed Agent Action Formulation
-        </span>
-        <span class="badge" style="background:#1e293b; color:#94a3b8">STAGE 01 / PROPOSAL</span>
+    <!-- Small uppercase eyebrow -->
+    <div class="landing-eyebrow">ZERO-TRUST · AI AGENT SECURITY</div>
+
+    <!-- Main headline, in the existing pixel font -->
+    <h1 class="headline-dot-matrix">TRINETRA</h1>
+
+    <!-- Supporting headline -->
+    <h2 class="landing-supporting-headline">Autonomous Agents. Accountable Actions.</h2>
+
+    <!-- Description -->
+    <p class="landing-hero-subtitle">
+      A context-aware safety gateway that validates intent, authorizes resources, assesses risk, and enforces policy before AI agents execute actions.
+    </p>
+
+    <!-- CTA: White pill button opening existing functional dashboard -->
+    <button type="button" class="white-get-started-btn" onclick="navigateToDashboard()">
+      <span>Explore the Gateway</span>
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+
+    <!-- Bottom Feature Strip: Four Core Capabilities -->
+    <div class="landing-capabilities-strip">
+      <div class="capability-item">
+        <span class="capability-label">INTENT VALIDATION</span>
       </div>
-      
-      <div class="card-body">
-        
-        <!-- Upload to Agent Workspace Component -->
-        <div class="upload-container" id="dropzone" role="button" tabindex="0" aria-label="Upload document to agent workspace">
-          <input type="file" id="file_input" style="display:none" accept=".txt,.pdf,.json,.csv,.md,.log,.yaml,.yml,.docx,.xlsx" onchange="handleFileSelect(event)">
-          <div class="upload-flex">
-            <div class="upload-info">
-              <div class="upload-icon" id="upload_icon">
-                <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
-              </div>
-              <div class="upload-text">
-                <strong id="upload_title">Upload Document to Agent Workspace</strong>
-                <span id="upload_subtitle">Drag & drop or browse · .txt, .pdf, .json, .csv, .md, .log, .yaml, .docx, .xlsx · max 5 MB</span>
-              </div>
-            </div>
-            <button type="button" class="upload-btn" id="upload_browse_btn" onclick="document.getElementById('file_input').click()">Browse File</button>
-          </div>
-          
-          <!-- Loading state -->
-          <div class="upload-progress" id="upload_progress">
-            <div class="upload-spinner"></div>
-            <span class="upload-progress-text">Uploading and validating file…</span>
-          </div>
-          
-          <!-- Staged file chip -->
-          <div class="upload-chip" id="upload_chip">
-            <div class="upload-chip-left">
-              <span>📄</span>
-              <span id="chip_filename">document.pdf</span>
-              <span class="upload-chip-tag" id="chip_size">14 KB</span>
-              <span style="color:var(--text-dim)" id="chip_hash">SHA: 7f3a…</span>
-            </div>
-            <button type="button" class="upload-remove" title="Remove staged file" onclick="clearUploadedFile()" aria-label="Remove file">✕</button>
-          </div>
-          
-          <!-- Error message -->
-          <div class="upload-error-msg" id="upload_error_msg">
-            <span>⚠</span>
-            <span id="upload_error_text">Error details here</span>
-          </div>
-        </div>
-
-        <!-- Form fields -->
-        <form id="action_form" onsubmit="event.preventDefault(); evaluatePolicy();">
-          <div class="form-grid">
-            <div class="field-group field-full">
-              <label for="user_request">User's Original Request <span class="required">Mandatory</span></label>
-              <textarea id="user_request" required rows="2" placeholder="e.g. Summarise the quarterly earnings report for me.">Summarise the confidential report for me.</textarea>
-            </div>
-
-            <div class="field-group field-full">
-              <label for="agent_goal">Agent's Stated Goal <span class="required">Mandatory</span></label>
-              <input id="agent_goal" required value="Summarise the confidential report" placeholder="What the agent intends to achieve">
-            </div>
-
-            <div class="field-group">
-              <label for="action_type">Proposed Action</label>
-              <select id="action_type">
-                <option value="read" selected>read (Inspect file / data)</option>
-                <option value="summarize">summarize (Synthesize content)</option>
-                <option value="email">email (Send email message)</option>
-                <option value="export">export (Download / dump data)</option>
-                <option value="share">share (Grant permission / link)</option>
-                <option value="delete">delete (Destroy / remove data)</option>
-                <option value="modify">modify (Alter / overwrite data)</option>
-                <option value="upload">upload (Stage new file)</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <label for="target">Target / Resource <span class="required">Resource ID</span></label>
-              <input id="target" value="confidential-report.pdf" required placeholder="File, directory, database table, or API target">
-            </div>
-
-            <div class="field-group">
-              <label for="destination">Destination</label>
-              <select id="destination">
-                <option value="" selected>None (Local workspace)</option>
-                <option value="internal">internal (Private network)</option>
-                <option value="external">external (External endpoint / partner)</option>
-                <option value="public">public (Public internet / cloud)</option>
-                <option value="unknown">unknown (Unverified host)</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <label for="data_sensitivity">Data Sensitivity Classification</label>
-              <select id="data_sensitivity">
-                <option value="public">public (Open knowledge)</option>
-                <option value="internal">internal (Non-sensitive internal)</option>
-                <option value="confidential" selected>confidential (Proprietary / business data)</option>
-                <option value="restricted">restricted (PII / credentials / critical)</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <label for="scope">Action Scope (Blast Radius)</label>
-              <select id="scope">
-                <option value="single" selected>single (Single file or row)</option>
-                <option value="multiple">multiple (Batch / directory)</option>
-                <option value="organization">organization (Global / multi-tenant)</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <label for="reversible">Reversibility</label>
-              <select id="reversible">
-                <option value="true" selected>Reversible (Can be rolled back)</option>
-                <option value="false">Non-reversible (Permanent change)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="switch-card" style="margin-top:14px;">
-            <label class="switch-item">
-              <input type="checkbox" id="tool_authorized" checked>
-              <span>Agent has valid tool execution authorization</span>
-            </label>
-            <label class="switch-item">
-              <input type="checkbox" id="simulate_verification_failure">
-              <span>Simulate post-execution state verification failure</span>
-            </label>
-          </div>
-
-          <div class="button-row">
-            <button type="submit" class="btn btn-primary" id="btn_evaluate">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
-              Evaluate Policy
-            </button>
-            <button type="button" class="btn btn-ghost" id="btn_execute" onclick="executeAction(false)">
-              Try Execution
-            </button>
-            <button type="button" class="btn btn-amber" id="btn_approve" onclick="executeAction(true)">
-              Approve &amp; Execute
-            </button>
-          </div>
-        </form>
-
+      <div class="capability-item">
+        <span class="capability-label">RESOURCE AUTHORIZATION</span>
       </div>
-    </section>
-
-    <!-- RIGHT PANEL: Safety Intelligence & Decision Engine -->
-    <section class="console-card">
-      <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-          Policy Enforcement &amp; Verification Telemetry
-        </span>
-        <span class="badge" id="request_id_badge" style="background:#1e293b; color:#94a3b8">AWAITING EVALUATION</span>
+      <div class="capability-item">
+        <span class="capability-label">RISK ASSESSMENT</span>
       </div>
-
-      <div class="card-body">
-        
-        <!-- READY / UN-EVALUATED STATE -->
-        <div class="monitor-ready" id="ready_state">
-          <div class="radar-ring">
-            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-          </div>
-          <h3>Policy Gateway Active &amp; Ready</h3>
-          <p>Configure an agent action on the left or click any <strong>⚡ Demo Preset</strong> above to evaluate policy enforcement, intent alignment, and risk scoring in real-time.</p>
-          <div class="capabilities-wrap">
-            <span class="control-pill">🛡️ Hard Prohibitions Gate</span>
-            <span class="control-pill">🔑 Resource Authorization</span>
-            <span class="control-pill">🧭 Intent Alignment Engine</span>
-            <span class="control-pill">👤 High-Impact Approval Rules</span>
-            <span class="control-pill">📊 0–100 Deterministic Risk Meter</span>
-          </div>
-        </div>
-
-        <!-- EVALUATION RESULTS -->
-        <div class="result-container" id="result_container">
-          
-          <!-- Hero Decision & Score -->
-          <div class="decision-hero">
-            <div class="decision-left">
-              <span class="decision-label">POLICY GATE DECISION</span>
-              <div class="decision-pill" id="decision_badge">ALLOW</div>
-            </div>
-            <div class="score-box">
-              <div class="score-value" id="score_display">0 <span style="font-size:14px; font-weight:600; color:var(--text-dim)">/ 100</span></div>
-              <span class="score-tier" id="score_tier">MINIMAL RISK</span>
-              <div class="score-track">
-                <div class="score-fill" id="score_fill" style="width: 10%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Intent Status Banner -->
-          <div class="intent-banner matched" id="intent_banner">
-            <span id="intent_icon">✓</span>
-            <span id="intent_text">Intent Check: Proposal matches user request intent.</span>
-          </div>
-
-          <!-- Explainable Rationale -->
-          <div>
-            <div class="section-subtitle">EXPLAINABLE POLICY RATIONALE</div>
-            <div class="reasons-list" id="reasons_container">
-              <!-- Dynamically populated -->
-            </div>
-          </div>
-
-          <!-- Required Security Controls -->
-          <div id="controls_section" style="display:none;">
-            <div class="section-subtitle">MANDATORY ENFORCED CONTROLS</div>
-            <div class="controls-wrap" id="controls_container"></div>
-          </div>
-
-          <!-- Execution & Outcome Verification -->
-          <div class="execution-card" id="execution_card" style="display:none;">
-            <div class="exec-header">
-              <span class="section-subtitle" style="margin:0">EXECUTION &amp; VERIFICATION TELEMETRY</span>
-              <span class="badge" id="exec_status_badge">EXECUTED_IN_MOCK</span>
-            </div>
-            <p class="exec-message" id="exec_message">Mock action executed and post-action state check passed.</p>
-          </div>
-
-        </div>
-
+      <div class="capability-item">
+        <span class="capability-label">HUMAN APPROVALS</span>
       </div>
-    </section>
+    </div>
 
   </div>
 
-  <!-- BOTTOM SECTION: Real-Time Security Audit Trail -->
-  <section class="audit-card">
-    <div class="card-header">
-      <span class="card-title">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-        Real-Time Security Audit Trail
-      </span>
-      <button class="upload-btn" id="btn_refresh_audit" style="padding:4px 10px; font-size:10px" onclick="loadAudit()">Refresh</button>
-    </div>
-    <div class="audit-table-wrap" id="audit_table_wrap">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Time (UTC)</th>
-            <th>Decision</th>
-            <th>Action</th>
-            <th>Target Resource</th>
-            <th>Execution Status</th>
-            <th>Risk Score</th>
-            <th>Outcome</th>
-          </tr>
-        </thead>
-        <tbody id="audit_tbody">
-          <tr><td colspan="7">
-            <div class="audit-empty">
-              <div class="audit-empty-icon">📋</div>
-              <p>No security events recorded yet. Evaluate an action or use a demo preset to generate audit entries.</p>
+  <!-- Landing Footer Spacer -->
+  <div class="landing-bottom-spacer"></div>
+
+</section>
+
+
+<!-- =========================================================================
+     EXPERIENCE 2: FUNCTIONAL TRINETRA DASHBOARD
+     ========================================================================= -->
+<div id="dashboard-view">
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+      <div class="dash-sidebar-header">
+        <div class="white-circle-logo" style="width:30px; height:30px;" onclick="navigateToLanding()">
+          <span class="circle-logo-text" style="font-size:12px">T</span>
+        </div>
+        <div>
+          <strong>TRINETRA</strong>
+          <small>AGENT SAFETY GATEWAY</small>
+        </div>
+      </div>
+
+      <button type="button" class="back-to-landing-btn" onclick="navigateToLanding()">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Landing Page</span>
+      </button>
+
+      <div class="dash-nav-list">
+        <div class="dash-nav-header">Workspace</div>
+        <a class="dash-nav-link active" href="#dashboard">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Command Center</span>
+        </a>
+        <a class="dash-nav-link" href="#evaluator">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Action Evaluator</span>
+        </a>
+        <a class="dash-nav-link" href="#decision">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Policy Decision</span>
+        </a>
+        <a class="dash-nav-link" href="#audit-section">
+          <i class="fa-solid fa-list-check"></i>
+          <span>SIEM Audit Trail</span>
+        </a>
+      </div>
+
+      <div class="sidebar-telemetry-card">
+        <div class="telemetry-status-row">
+          <span class="pulse-circle"></span>
+          <span>GATEWAY ARMED</span>
+        </div>
+        <p>4 Policy Gates Active<br>Simulated mock environment</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content -->
+    <main class="dash-content">
+      
+      <!-- Topbar -->
+      <div class="dash-topbar">
+        <div class="dash-topbar-left">
+          <div class="dash-eyebrow">CONTEXT-AWARE AI ACTION CONTROL</div>
+          <h1>Security command centre</h1>
+          <div class="subtext">Inspect intent. Enforce policy. Verify every outcome.</div>
+        </div>
+        <div class="topbar-right-chips">
+          <span class="top-chip">
+            <span class="pulse-circle" style="width:5px; height:5px;"></span>
+            API CONNECTED
+          </span>
+          <span class="top-chip mock">◆ MOCK SANDBOX</span>
+          <button type="button" class="inspect-pill-btn" onclick="navigateToLanding()">Landing ↗</button>
+        </div>
+      </div>
+
+      <!-- Presets Strip -->
+      <div class="dash-presets-bar">
+        <span class="presets-caption">⚡ Presets:</span>
+        <button type="button" class="preset-pill active" id="pbtn_safe_summary" onclick="loadPreset('safe_summary')">
+          <span>Safe Summary</span>
+          <span class="outcome-badge out-allow">ALLOW</span>
+        </button>
+        <button type="button" class="preset-pill" id="pbtn_external_leak" onclick="loadPreset('external_leak')">
+          <span>External Leak</span>
+          <span class="outcome-badge out-block">BLOCK</span>
+        </button>
+        <button type="button" class="preset-pill" id="pbtn_high_impact_delete" onclick="loadPreset('high_impact_delete')">
+          <span>Org Delete</span>
+          <span class="outcome-badge out-approval">APPROVAL</span>
+        </button>
+        <button type="button" class="preset-pill" id="pbtn_unauth_tool" onclick="loadPreset('unauth_tool')">
+          <span>Unauth Tool</span>
+          <span class="outcome-badge out-block">BLOCK</span>
+        </button>
+        <button type="button" class="preset-pill" id="pbtn_prohibited_target" onclick="loadPreset('prohibited_target')">
+          <span>Target (.env)</span>
+          <span class="outcome-badge out-block">HARD GATE</span>
+        </button>
+        <button type="button" class="preset-pill" id="pbtn_verification_failure" onclick="loadPreset('verification_failure')">
+          <span>Verify Fail</span>
+          <span class="outcome-badge out-sim">SIMULATED</span>
+        </button>
+      </div>
+
+      <!-- Overview Metrics -->
+      <div class="dash-overview-grid">
+        <div class="overview-box">
+          <div class="box-kicker">Policy Engine</div>
+          <div class="box-val">Active <span>● READY</span></div>
+        </div>
+        <div class="overview-box">
+          <div class="box-kicker">Execution Environment</div>
+          <div class="box-val">Simulated <span>NO LIVE ACTIONS</span></div>
+        </div>
+        <div class="overview-box">
+          <div class="box-kicker">Control Sequence</div>
+          <div class="box-val" style="font-size:13px; font-family:var(--font-mono)">Evaluate → Decide → Verify</div>
+        </div>
+      </div>
+
+      <!-- Two-Column Workspace -->
+      <div class="command-columns">
+        
+        <!-- LEFT: Proposed Action Form & Document Upload -->
+        <section class="panel-card" id="evaluator">
+          <div class="panel-card-head">
+            <span class="card-head-title">Proposed Action Formulation</span>
+            <span class="card-head-step">REQUEST / 01</span>
+          </div>
+
+          <div class="panel-card-body">
+            
+            <!-- Upload Document to Agent Sandbox -->
+            <div class="dash-dropzone" id="dropzone">
+              <input type="file" id="file_input" style="display:none" accept=".txt,.pdf,.json,.csv,.md,.log,.yaml,.yml,.docx,.xlsx" onchange="handleFileSelect(event)">
+              <div class="dropzone-inner">
+                <div class="dropzone-details">
+                  <div class="dropzone-avatar"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+                  <div class="dropzone-txt">
+                    <strong>Upload Document to Agent Workspace</strong>
+                    <span>Stage .txt, .pdf, .json, .csv, .md (max 5MB)</span>
+                  </div>
+                </div>
+                <button type="button" class="dash-browse-btn" onclick="document.getElementById('file_input').click()">Browse</button>
+              </div>
+
+              <!-- Uploaded file chip -->
+              <div class="dash-upload-chip" id="upload_chip">
+                <div class="chip-meta-left">
+                  <span>📄</span>
+                  <span id="chip_filename" style="font-weight:700">document.pdf</span>
+                  <span class="chip-tag-ok" id="chip_size">14 KB</span>
+                  <span id="chip_hash" style="color:var(--text-dim)">SHA: 7f3a...</span>
+                </div>
+                <button type="button" class="chip-remove-btn" title="Remove staged file" onclick="clearUploadedFile()">✕</button>
+              </div>
             </div>
-          </td></tr>
-        </tbody>
-      </table>
+
+            <!-- Form -->
+            <form id="action_form" onsubmit="event.preventDefault(); evaluatePolicy();">
+              <div class="form-2col-grid">
+                
+                <div class="form-group-field field-span-all">
+                  <label class="input-header-label" for="user_request">
+                    User's Original Request
+                    <span>REQUIRED</span>
+                  </label>
+                  <textarea id="user_request" required rows="2" placeholder="e.g. Summarise the confidential report for me.">Summarise the confidential report for me.</textarea>
+                </div>
+
+                <div class="form-group-field field-span-all">
+                  <label class="input-header-label" for="agent_goal">
+                    Agent's Stated Goal
+                    <span>REQUIRED</span>
+                  </label>
+                  <input type="text" id="agent_goal" required value="Summarise the confidential report" placeholder="What the agent intends to achieve">
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="action_type">Proposed Action</label>
+                  <select id="action_type">
+                    <option value="read" selected>read</option>
+                    <option value="summarize">summarize</option>
+                    <option value="email">email</option>
+                    <option value="export">export</option>
+                    <option value="share">share</option>
+                    <option value="delete">delete</option>
+                    <option value="modify">modify</option>
+                    <option value="upload">upload</option>
+                  </select>
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="target">
+                    Target / Resource
+                    <span>IDENTIFIER</span>
+                  </label>
+                  <input type="text" id="target" value="confidential-report.pdf" required placeholder="Resource target or file">
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="destination">Destination</label>
+                  <select id="destination">
+                    <option value="" selected>None (Local workspace)</option>
+                    <option value="internal">internal</option>
+                    <option value="external">external</option>
+                    <option value="public">public</option>
+                    <option value="unknown">unknown</option>
+                  </select>
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="data_sensitivity">Data Sensitivity</label>
+                  <select id="data_sensitivity">
+                    <option value="public">public</option>
+                    <option value="internal">internal</option>
+                    <option value="confidential" selected>confidential</option>
+                    <option value="restricted">restricted</option>
+                  </select>
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="scope">Action Scope</label>
+                  <select id="scope">
+                    <option value="single" selected>single</option>
+                    <option value="multiple">multiple</option>
+                    <option value="organization">organization</option>
+                  </select>
+                </div>
+
+                <div class="form-group-field">
+                  <label class="input-header-label" for="reversible">Reversibility</label>
+                  <select id="reversible">
+                    <option value="true" selected>Reversible</option>
+                    <option value="false">Hard to reverse</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <!-- Switches -->
+              <div class="switches-wrapper" style="margin-top:10px;">
+                <label class="switch-item-row">
+                  <input type="checkbox" id="tool_authorized" checked>
+                  <span>Agent is authorised to use this tool</span>
+                </label>
+                <label class="switch-item-row">
+                  <input type="checkbox" id="simulate_verification_failure">
+                  <span>Simulate post-action verification failure</span>
+                </label>
+              </div>
+
+              <!-- Buttons -->
+              <div class="form-buttons-row">
+                <button type="submit" class="action-pill-btn btn-primary-white" id="btn_evaluate">
+                  <span>Evaluate Action ↗</span>
+                </button>
+                <button type="button" class="action-pill-btn btn-secondary-ghost" id="btn_execute" onclick="executeAction(false)">
+                  <span>Try Execution</span>
+                </button>
+                <button type="button" class="action-pill-btn btn-approval-amber" id="btn_approve" onclick="executeAction(true)">
+                  <span>Approve + Exec</span>
+                </button>
+              </div>
+              <p style="font-size:10px; color:var(--text-dim); margin-top:8px;">
+                Simulation only. No real email, file deletion, financial, or external system actions are executed.
+              </p>
+            </form>
+
+          </div>
+        </section>
+
+        <!-- RIGHT: Decision, Risk Breakdown & Pipeline -->
+        <section class="panel-card" id="decision">
+          <div class="panel-card-head">
+            <span class="card-head-title">Policy Decision Telemetry</span>
+            <span class="card-head-step" id="decision_step_id">AWAITING INPUT</span>
+          </div>
+
+          <div class="panel-card-body">
+            
+            <!-- Idle State -->
+            <div class="idle-prompt-box" id="idle_state">
+              <div class="idle-shield-crest"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3>Gateway Standing By</h3>
+              <p>Configure an action on the left or select a <strong>⚡ Preset</strong> to evaluate policy decisions, risk scores, and control rationale.</p>
+            </div>
+
+            <!-- Evaluated Results Container -->
+            <div class="eval-content-box" id="eval_results">
+              
+              <!-- Decision Summary Hero -->
+              <div class="decision-summary-hero">
+                <div class="decision-hero-left">
+                  <span class="hero-assessment-kicker">ASSESSMENT RESULT</span>
+                  <div class="decision-status-pill" id="decision_pill">ALLOW</div>
+                  <span style="font-size:11px; color:var(--text-muted); margin-top:4px;" id="decision_sub">Autonomous action evaluated against safety baseline.</span>
+                </div>
+
+                <div class="decision-hero-right">
+                  <div class="score-big-number" id="score_number">0</div>
+                  <span class="score-unit-label">/ 100 RISK SCORE</span>
+                  <div class="score-meter-track">
+                    <div class="score-meter-bar" id="score_fill_bar" style="width: 10%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4-Stage Sequential Policy Pipeline Tracker -->
+              <div class="pipeline-module">
+                <div class="pipeline-module-top">
+                  <span class="pipeline-kicker-title">Sequential Security Pipeline</span>
+                  <span style="font-family:var(--font-mono); font-size:9px; color:var(--text-dim);" id="eval_timestamp_label">—</span>
+                </div>
+                <div class="pipeline-step-grid">
+                  
+                  <div class="pipe-step-card" id="pstage_intent">
+                    <div class="pipe-step-card-top">
+                      <span class="step-order-number">01</span>
+                      <span class="step-result-tag out-allow" id="pbadge_intent">PASS</span>
+                    </div>
+                    <div class="step-title-text">Intent Check</div>
+                    <div class="step-desc-text" id="pdesc_intent">Aligns with request.</div>
+                  </div>
+
+                  <div class="pipe-step-card" id="pstage_auth">
+                    <div class="pipe-step-card-top">
+                      <span class="step-order-number">02</span>
+                      <span class="step-result-tag out-allow" id="pbadge_auth">PASS</span>
+                    </div>
+                    <div class="step-title-text">Resource Auth</div>
+                    <div class="step-desc-text" id="pdesc_auth">Authorized target.</div>
+                  </div>
+
+                  <div class="pipe-step-card" id="pstage_risk">
+                    <div class="pipe-step-card-top">
+                      <span class="step-order-number">03</span>
+                      <span class="step-result-tag out-allow" id="pbadge_risk">LOW</span>
+                    </div>
+                    <div class="step-title-text">Risk Assessment</div>
+                    <div class="step-desc-text" id="pdesc_risk">Score within limits.</div>
+                  </div>
+
+                  <div class="pipe-step-card" id="pstage_policy">
+                    <div class="pipe-step-card-top">
+                      <span class="step-order-number">04</span>
+                      <span class="step-result-tag out-allow" id="pbadge_policy">ALLOW</span>
+                    </div>
+                    <div class="step-title-text">Enforcement</div>
+                    <div class="step-desc-text" id="pdesc_policy">Execution permitted.</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Threat Dimensions Breakdown -->
+              <div class="threat-dimensions-module">
+                <div class="pipeline-kicker-title">Contributing Threat Dimensions</div>
+                <div class="dimensions-grid-row">
+                  <div class="dimension-card">
+                    <span class="dim-card-label">Sensitivity</span>
+                    <span class="dim-card-points" id="rf_sens">+10 pts</span>
+                    <span class="dim-card-sub" id="rf_sens_name">internal</span>
+                  </div>
+                  <div class="dimension-card">
+                    <span class="dim-card-label">Action</span>
+                    <span class="dim-card-points" id="rf_act">+0 pts</span>
+                    <span class="dim-card-sub" id="rf_act_name">read</span>
+                  </div>
+                  <div class="dimension-card">
+                    <span class="dim-card-label">Scope</span>
+                    <span class="dim-card-points" id="rf_scope">+0 pts</span>
+                    <span class="dim-card-sub" id="rf_scope_name">single</span>
+                  </div>
+                  <div class="dimension-card">
+                    <span class="dim-card-label">Destination</span>
+                    <span class="dim-card-points" id="rf_dest">+0 pts</span>
+                    <span class="dim-card-sub" id="rf_dest_name">none</span>
+                  </div>
+                  <div class="dimension-card">
+                    <span class="dim-card-label">Reversibility</span>
+                    <span class="dim-card-points" id="rf_rev">+0 pts</span>
+                    <span class="dim-card-sub" id="rf_rev_name">reversible</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Decision Rationale -->
+              <div>
+                <div class="pipeline-kicker-title" style="margin-bottom:6px;">Decision Rationale</div>
+                <div class="reasons-scroll-box" id="reasons_list"></div>
+              </div>
+
+              <!-- Required Controls -->
+              <div id="controls_wrap_box" style="display:none;">
+                <div class="pipeline-kicker-title" style="margin-bottom:6px;">Required Enforced Controls</div>
+                <div class="controls-pills-row" id="controls_pills"></div>
+              </div>
+
+              <!-- Execution Telemetry -->
+              <div class="execution-card-block" id="execution_box" style="display:none;">
+                <div class="exec-block-head">
+                  <span class="pipeline-kicker-title">Execution Telemetry</span>
+                  <span class="step-result-tag out-allow" id="exec_status_tag">EXECUTED</span>
+                </div>
+                <p class="exec-block-msg" id="exec_message_text">—</p>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- BOTTOM: SIEM Audit Trail -->
+      <section class="panel-card audit-trail-card" id="audit-section">
+        <div class="panel-card-head">
+          <span class="card-head-title">Real-Time Security Audit Trail</span>
+          <div class="audit-bar-controls">
+            <div class="audit-tab-filter-group">
+              <button type="button" class="tab-filter-btn active" onclick="setAuditFilter('ALL')">All</button>
+              <button type="button" class="tab-filter-btn" onclick="setAuditFilter('BLOCK')">Blocked</button>
+              <button type="button" class="tab-filter-btn" onclick="setAuditFilter('REQUIRE_APPROVAL')">Approvals</button>
+              <button type="button" class="tab-filter-btn" onclick="setAuditFilter('ALLOW')">Allowed</button>
+            </div>
+            <input type="text" class="audit-search-input-field" id="audit_query" placeholder="Filter target or action..." oninput="renderAuditTable()">
+            <button type="button" class="inspect-pill-btn" onclick="loadAudit()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="audit-table-scroll">
+          <table class="audit-siem-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Decision</th>
+                <th>Action</th>
+                <th>Target Resource</th>
+                <th>Status</th>
+                <th>Risk</th>
+                <th>Outcome</th>
+                <th>Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="audit_table_body">
+              <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-dim)">Loading audit log...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding:14px 2px 28px; display:flex; justify-content:space-between; color:var(--text-dim); font-size:10px; font-family:var(--font-mono)">
+        <span>TRINETRA / AI AGENT SAFETY GATEWAY</span>
+        <span>Deterministic Zero-Trust Interceptor · Mock Sandbox</span>
+      </footer>
+
+    </main>
+
+  </div>
+</div>
+
+<!-- =========================================================================
+     MODAL: Audit Event Deep-Dive Inspection
+     ========================================================================= -->
+<div class="modal-overlay-wrap" id="event_modal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-window-card">
+    <div class="modal-window-head">
+      <span class="modal-heading">Audit Event Telemetry</span>
+      <button type="button" class="modal-close-icon" onclick="closeModal()">✕</button>
     </div>
-  </section>
-</main>
+    <div class="modal-window-body" id="modal_content"></div>
+  </div>
+</div>
 
-<footer>
-  <p><strong>TRINETRA</strong> — Context-Aware Safety Gateway for AI Agent Actions · Mock Sandbox Mode · No real systems connected</p>
-</footer>
+<!-- Toast -->
+<div class="dash-toast" id="toast_notification"></div>
 
-<div class="toast" id="toast_msg"></div>
-
+<!-- =========================================================================
+     ROUTING & INTERACTION LOGIC
+     ========================================================================= -->
 <script>
-// ─── Constants ───
-const ALLOWED_EXTENSIONS = new Set(['.txt', '.pdf', '.json', '.csv', '.md', '.log', '.yaml', '.yml', '.docx', '.xlsx']);
-const PROHIBITED_EXTENSIONS = new Set(['.exe', '.sh', '.bat', '.bin', '.py', '.cmd', '.vbs', '.ps1', '.dll', '.so']);
-const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5 MB
+function checkRoute() {
+  const hash = window.location.hash;
+  const isDashboard = ['#dashboard', '#evaluator', '#decision', '#audit-section', '#overview'].includes(hash);
+  const landingEl = document.getElementById('landing-view');
+  const dashEl = document.getElementById('dashboard-view');
+  const videoEl = document.querySelector('.hero-video-media');
 
-// ─── Preset Scenarios ───
+  if (isDashboard) {
+    landingEl.style.display = 'none';
+    dashEl.style.display = 'block';
+    if (videoEl) videoEl.pause();
+    window.scrollTo(0, 0);
+  } else {
+    landingEl.style.display = 'flex';
+    dashEl.style.display = 'none';
+    if (videoEl) videoEl.play().catch(() => {});
+    window.scrollTo(0, 0);
+  }
+}
+
+function navigateToDashboard() {
+  window.location.hash = '#dashboard';
+}
+
+function navigateToLanding() {
+  window.location.hash = '#landing';
+}
+
+window.addEventListener('hashchange', checkRoute);
+
+// Presets Definition
 const PRESETS = {
   safe_summary: {
     user_request: "Summarise the quarterly earnings document for me.",
@@ -1283,14 +2060,14 @@ const PRESETS = {
     simulate_verification_failure: false
   },
   high_impact_delete: {
-    user_request: "Clean up the old project directory.",
+    user_request: "Please delete the old project archive files across organization.",
     agent_goal: "Delete old project archive files across organization",
     action_type: "delete",
     target: "company-archive-2025/",
     destination: "",
-    data_sensitivity: "restricted",
+    data_sensitivity: "internal",
     scope: "organization",
-    reversible: "false",
+    reversible: "true",
     tool_authorized: true,
     simulate_verification_failure: false
   },
@@ -1304,6 +2081,18 @@ const PRESETS = {
     scope: "single",
     reversible: "true",
     tool_authorized: false,
+    simulate_verification_failure: false
+  },
+  prohibited_target: {
+    user_request: "Inspect the system environment credentials configuration.",
+    agent_goal: "Read configuration file",
+    action_type: "read",
+    target: ".env",
+    destination: "",
+    data_sensitivity: "restricted",
+    scope: "single",
+    reversible: "true",
+    tool_authorized: true,
     simulate_verification_failure: false
   },
   verification_failure: {
@@ -1320,47 +2109,31 @@ const PRESETS = {
   }
 };
 
-// ─── Utility Helpers ───
-function val(id) { return document.getElementById(id).value; }
-function setVal(id, v) { document.getElementById(id).value = v; }
+let currentAuditEvents = [];
+let currentFilter = 'ALL';
 
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+function val(id) { 
+  const el = document.getElementById(id);
+  return el ? el.value : ''; 
+}
+function setVal(id, v) { 
+  const el = document.getElementById(id);
+  if (el) el.value = v; 
 }
 
-function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
-function getFileExtension(filename) {
-  const dot = filename.lastIndexOf('.');
-  return dot >= 0 ? filename.slice(dot).toLowerCase() : '';
-}
-
-// ─── Toast System ───
-let toastTimer = null;
-function showToast(msg, type = 'error') {
-  const t = document.getElementById('toast_msg');
+function showToast(msg) {
+  const t = document.getElementById('toast_notification');
   t.textContent = msg;
-  t.className = 'toast active toast-' + type;
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.classList.remove('active'); }, 4500);
+  t.classList.add('active');
+  setTimeout(() => t.classList.remove('active'), 3500);
 }
-
-// ─── Preset Loading ───
-let activePreset = null;
 
 function loadPreset(key) {
   const p = PRESETS[key];
   if (!p) return;
-
-  // Highlight active preset button
-  document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-  const btn = document.getElementById('preset_' + key);
+  document.querySelectorAll('.preset-pill').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('pbtn_' + key);
   if (btn) btn.classList.add('active');
-  activePreset = key;
 
   setVal('user_request', p.user_request);
   setVal('agent_goal', p.agent_goal);
@@ -1375,7 +2148,6 @@ function loadPreset(key) {
   evaluatePolicy();
 }
 
-// ─── Form Payload ───
 function getPayload() {
   return {
     user_request: val('user_request'),
@@ -1391,31 +2163,19 @@ function getPayload() {
   };
 }
 
-// ─── Upload Handling ───
+// Upload Handling
 const dropzone = document.getElementById('dropzone');
-
-// Drag and drop events
-['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, (evt) => {
-  evt.preventDefault();
-  evt.stopPropagation();
-  dropzone.classList.add('dragover');
+['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, (evt) => { 
+  evt.preventDefault(); 
+  dropzone.classList.add('dragover'); 
 }));
-['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, (evt) => {
-  evt.preventDefault();
-  evt.stopPropagation();
-  dropzone.classList.remove('dragover');
+['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, (evt) => { 
+  evt.preventDefault(); 
+  dropzone.classList.remove('dragover'); 
 }));
 dropzone.addEventListener('drop', (evt) => {
   const files = evt.dataTransfer.files;
   if (files && files.length) uploadFile(files[0]);
-});
-
-// Keyboard accessibility for dropzone
-dropzone.addEventListener('keydown', (evt) => {
-  if (evt.key === 'Enter' || evt.key === ' ') {
-    evt.preventDefault();
-    document.getElementById('file_input').click();
-  }
 });
 
 function handleFileSelect(evt) {
@@ -1423,68 +2183,7 @@ function handleFileSelect(evt) {
   if (files && files.length) uploadFile(files[0]);
 }
 
-function showUploadError(msg) {
-  const container = document.getElementById('dropzone');
-  const errEl = document.getElementById('upload_error_msg');
-  const errText = document.getElementById('upload_error_text');
-
-  container.classList.add('upload-error');
-  errText.textContent = msg;
-  errEl.classList.add('active');
-
-  setTimeout(() => {
-    container.classList.remove('upload-error');
-    errEl.classList.remove('active');
-  }, 5000);
-}
-
-function showUploadProgress(show) {
-  const el = document.getElementById('upload_progress');
-  if (show) {
-    el.classList.add('active');
-    document.getElementById('upload_browse_btn').disabled = true;
-  } else {
-    el.classList.remove('active');
-    document.getElementById('upload_browse_btn').disabled = false;
-  }
-}
-
 async function uploadFile(file) {
-  // Reset previous states
-  document.getElementById('upload_error_msg').classList.remove('active');
-  document.getElementById('dropzone').classList.remove('upload-error', 'upload-success');
-
-  // ─── Client-side validation ───
-  const ext = getFileExtension(file.name);
-
-  if (PROHIBITED_EXTENSIONS.has(ext)) {
-    showUploadError(`File extension '${ext}' is prohibited for security reasons. Executable files cannot be staged.`);
-    showToast(`Upload blocked: '${ext}' files are prohibited`, 'error');
-    return;
-  }
-
-  if (!ALLOWED_EXTENSIONS.has(ext)) {
-    const allowed = Array.from(ALLOWED_EXTENSIONS).sort().join(', ');
-    showUploadError(`Unsupported file extension '${ext}'. Permitted formats: ${allowed}`);
-    showToast(`Upload blocked: unsupported file type '${ext}'`, 'error');
-    return;
-  }
-
-  if (file.size > MAX_UPLOAD_SIZE) {
-    showUploadError(`File size (${formatFileSize(file.size)}) exceeds the 5 MB limit.`);
-    showToast('Upload blocked: file exceeds 5 MB limit', 'error');
-    return;
-  }
-
-  if (file.size === 0) {
-    showUploadError('Cannot upload an empty file.');
-    showToast('Upload blocked: empty file', 'error');
-    return;
-  }
-
-  // ─── Upload to backend ───
-  showUploadProgress(true);
-
   try {
     const formData = new FormData();
     formData.append('file', file, file.name);
@@ -1494,44 +2193,38 @@ async function uploadFile(file) {
       body: formData
     });
 
-    showUploadProgress(false);
-
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+      const err = await res.json();
       throw new Error(err.detail || 'Upload failed');
     }
 
     const data = await res.json();
     setVal('target', data.filename);
     
-    // Show success state
-    const container = document.getElementById('dropzone');
-    container.classList.add('upload-success');
-
-    // Populate chip
     document.getElementById('chip_filename').textContent = data.filename;
-    document.getElementById('chip_size').textContent = formatFileSize(data.size_bytes);
-    document.getElementById('chip_hash').textContent = 'SHA-256: ' + data.sha256.slice(0, 10) + '…';
+    document.getElementById('chip_size').textContent = (data.size_bytes / 1024).toFixed(1) + ' KB';
+    document.getElementById('chip_hash').textContent = 'SHA: ' + data.sha256.slice(0, 8) + '...';
     document.getElementById('upload_chip').classList.add('active');
 
-    showToast(`"${data.filename}" staged in mock workspace (${formatFileSize(data.size_bytes)})`, 'success');
+    showToast(`File "${data.filename}" staged in agent sandbox`);
     loadAudit();
   } catch (err) {
-    showUploadProgress(false);
-    showUploadError(err.message);
-    showToast('Upload error: ' + err.message, 'error');
+    showToast('Upload error: ' + err.message);
   }
 }
 
 function clearUploadedFile() {
   document.getElementById('file_input').value = '';
   document.getElementById('upload_chip').classList.remove('active');
-  document.getElementById('dropzone').classList.remove('upload-success');
-  document.getElementById('upload_error_msg').classList.remove('active');
 }
 
-// ─── API Calls ───
+// API Calls
 async function evaluatePolicy() {
+  const btn = document.getElementById('btn_evaluate');
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = 'Evaluating...';
+
   try {
     const payload = getPayload();
     const res = await fetch('/api/evaluate', {
@@ -1544,11 +2237,19 @@ async function evaluatePolicy() {
     renderEvaluation(data);
     loadAudit();
   } catch (err) {
-    showToast('Error: ' + err.message, 'error');
+    showToast('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
 }
 
 async function executeAction(approved) {
+  const btn = approved ? document.getElementById('btn_approve') : document.getElementById('btn_execute');
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = approved ? 'Approving...' : 'Executing...';
+
   try {
     const payload = getPayload();
     const res = await fetch('/api/execute?approved=' + approved, {
@@ -1559,7 +2260,6 @@ async function executeAction(approved) {
     if (!res.ok) throw new Error('Execution request failed (' + res.status + ')');
     const data = await res.json();
     
-    // Render full evaluation results and execution box
     const evalData = {
       request_id: data.request_id,
       decision: data.decision,
@@ -1570,165 +2270,351 @@ async function executeAction(approved) {
     };
     renderEvaluation(evalData, data);
     loadAudit();
+
+    if (data.status === 'BLOCKED') {
+      showToast('Action Blocked: ' + data.message);
+    } else if (data.status === 'PENDING_APPROVAL') {
+      showToast('Action Paused: Human authorization required.');
+    } else {
+      showToast('Action Executed: ' + data.status);
+    }
   } catch (err) {
-    showToast('Execution error: ' + err.message, 'error');
+    showToast('Execution error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
 }
 
-// ─── Render Evaluation ───
 function renderEvaluation(d, execution = null) {
-  document.getElementById('ready_state').style.display = 'none';
-  document.getElementById('result_container').classList.add('active');
-  document.getElementById('request_id_badge').textContent = 'ID: ' + d.request_id;
-
-  // Decision Pill
-  const pill = document.getElementById('decision_badge');
-  pill.className = 'decision-pill ' + d.decision;
-  const decisionLabel = d.decision === 'REQUIRE_APPROVAL' ? 'REQUIRE APPROVAL' : d.decision;
-  pill.textContent = decisionLabel;
-
-  // Risk Score & Tier
-  const score = Math.max(0, Math.min(100, d.risk_score));
-  document.getElementById('score_display').innerHTML = `${score} <span style="font-size:14px; font-weight:600; color:var(--text-dim)">/ 100</span>`;
-  const fill = document.getElementById('score_fill');
-  fill.style.width = Math.max(3, score) + '%';
+  document.getElementById('idle_state').style.display = 'none';
+  document.getElementById('eval_results').classList.add('active');
+  document.getElementById('decision_step_id').textContent = 'ID / ' + d.request_id;
   
-  const tier = document.getElementById('score_tier');
-  const scoreEl = document.getElementById('score_display');
+  const now = new Date();
+  document.getElementById('eval_timestamp_label').textContent = now.toLocaleTimeString() + ' UTC';
+
+  // Decision Status Pill
+  const pill = document.getElementById('decision_pill');
+  pill.className = 'decision-status-pill ' + d.decision;
+  pill.textContent = d.decision.replace('_', ' ');
+
+  const sub = document.getElementById('decision_sub');
+  if (d.decision === 'ALLOW') {
+    sub.textContent = 'Action passed all 4 validation gates. Approved for mock execution.';
+  } else if (d.decision === 'REQUIRE_APPROVAL') {
+    sub.textContent = 'High-impact policy or elevated blast radius requires human sign-off.';
+  } else {
+    sub.textContent = 'Hard security prohibition or missing permission strictly blocked.';
+  }
+
+  // Risk Score
+  const score = Math.max(0, Math.min(100, d.risk_score));
+  document.getElementById('score_number').textContent = score;
+  const fillBar = document.getElementById('score_fill_bar');
+  fillBar.style.width = score + '%';
   if (score >= 65) {
-    tier.textContent = 'HIGH RISK (CRITICAL)';
-    tier.style.color = 'var(--rose)';
-    fill.style.background = 'linear-gradient(90deg, var(--amber), var(--rose))';
-    scoreEl.style.color = 'var(--rose)';
+    fillBar.style.background = 'var(--red)';
   } else if (score >= 30) {
-    tier.textContent = 'MODERATE RISK';
-    tier.style.color = 'var(--amber)';
-    fill.style.background = 'linear-gradient(90deg, var(--amber), #ef9a0d)';
-    scoreEl.style.color = 'var(--amber)';
+    fillBar.style.background = 'var(--amber)';
   } else {
-    tier.textContent = 'LOW RISK';
-    tier.style.color = 'var(--emerald)';
-    fill.style.background = 'var(--emerald)';
-    scoreEl.style.color = 'var(--emerald)';
+    fillBar.style.background = 'var(--green)';
   }
 
-  // Intent Banner
-  const ib = document.getElementById('intent_banner');
-  if (d.intent_match) {
-    ib.className = 'intent-banner matched';
-    document.getElementById('intent_icon').textContent = '✓';
-    document.getElementById('intent_text').textContent = 'Intent Verified: Proposal directly aligns with user request.';
-  } else {
-    ib.className = 'intent-banner mismatch';
-    document.getElementById('intent_icon').textContent = '✕';
-    document.getElementById('intent_text').textContent = 'Intent Mismatch Detected: Agent proposal deviates from user consent.';
-  }
+  // Render Factor Breakdown
+  renderFactors();
 
-  // Reasons
-  const reasonsBox = document.getElementById('reasons_container');
-  reasonsBox.innerHTML = (d.reasons || []).map(r => {
-    let cls = 'reason-card';
-    if (r.includes('Prohibited') || r.includes('BLOCK') || r.includes('denied')) cls += ' prohibited';
-    else if (r.includes('High-impact') || r.includes('approval')) cls += ' approval';
+  // Render 4-Stage Pipeline
+  renderPipeline(d);
+
+  // Reasons List
+  const reasonsList = document.getElementById('reasons_list');
+  reasonsList.innerHTML = (d.reasons || []).map(r => {
+    let cls = 'reason-card-item';
+    if (r.includes('Prohibited') || r.includes('BLOCK') || r.includes('denied') || r.includes('Hard Gate')) cls += ' danger';
+    else if (r.includes('High-impact') || r.includes('approval') || r.includes('REQUIRE_APPROVAL')) cls += ' warning';
     return `<div class="${cls}">${escapeHtml(r)}</div>`;
-  }).join('') || '<div class="reason-card">No explanation returned.</div>';
+  }).join('') || '<div class="reason-card-item">No explanation returned.</div>';
 
-  // Controls
-  const ctrlSec = document.getElementById('controls_section');
+  // Required Controls
+  const ctrlBox = document.getElementById('controls_wrap_box');
   if (d.required_controls && d.required_controls.length > 0) {
-    ctrlSec.style.display = 'block';
-    document.getElementById('controls_container').innerHTML = d.required_controls.map(c => 
-      `<span class="control-pill">🛡️ ${escapeHtml(c)}</span>`
+    ctrlBox.style.display = 'block';
+    document.getElementById('controls_pills').innerHTML = d.required_controls.map(c => 
+      `<span class="control-chip-badge">🛡️ ${escapeHtml(c)}</span>`
     ).join('');
   } else {
-    ctrlSec.style.display = 'none';
+    ctrlBox.style.display = 'none';
   }
 
-  // Execution card
-  const execCard = document.getElementById('execution_card');
+  // Execution Telemetry Box
+  const execBox = document.getElementById('execution_box');
   if (execution) {
-    execCard.style.display = 'flex';
-    const stBadge = document.getElementById('exec_status_badge');
-    stBadge.textContent = execution.status;
+    execBox.style.display = 'flex';
+    const tag = document.getElementById('exec_status_tag');
+    tag.textContent = execution.status;
     if (execution.status === 'EXECUTED_IN_MOCK') {
-      stBadge.style.background = 'var(--emerald-bg)';
-      stBadge.style.color = 'var(--emerald)';
-      stBadge.style.border = '1px solid var(--emerald-border)';
+      tag.className = 'step-result-tag out-allow';
     } else if (execution.status === 'EXECUTED_BUT_UNVERIFIED') {
-      stBadge.style.background = 'var(--rose-bg)';
-      stBadge.style.color = 'var(--rose)';
-      stBadge.style.border = '1px solid var(--rose-border)';
-    } else if (execution.status === 'BLOCKED') {
-      stBadge.style.background = 'var(--rose-bg)';
-      stBadge.style.color = 'var(--rose)';
-      stBadge.style.border = '1px solid var(--rose-border)';
+      tag.className = 'step-result-tag out-block';
     } else {
-      stBadge.style.background = 'var(--amber-bg)';
-      stBadge.style.color = 'var(--amber)';
-      stBadge.style.border = '1px solid var(--amber-border)';
+      tag.className = 'step-result-tag out-approval';
     }
-    document.getElementById('exec_message').textContent = execution.message;
+    document.getElementById('exec_message_text').textContent = execution.message;
   } else {
-    execCard.style.display = 'none';
-  }
-
-  // Scroll result into view on mobile
-  if (window.innerWidth <= 1080) {
-    document.getElementById('result_container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    execBox.style.display = 'none';
   }
 }
 
-// ─── Audit Trail ───
+function renderFactors() {
+  const sens = val('data_sensitivity');
+  const scope = val('scope');
+  const act = val('action_type');
+  const dest = val('destination');
+  const rev = val('reversible') === 'true';
+
+  const sensPts = { public: 0, internal: 10, confidential: 25, restricted: 35 }[sens] || 15;
+  const scopePts = { single: 0, multiple: 12, organization: 25 }[scope] || 10;
+  const actPts = { read: 0, summarize: 0, email: 12, share: 15, export: 20, modify: 18, delete: 25, upload: 18 }[act] || 12;
+  const destPts = (dest && ['external', 'public', 'unknown'].includes(dest)) ? 20 : 0;
+  const revPts = rev ? 0 : 15;
+
+  document.getElementById('rf_sens').textContent = `+${sensPts} pts`;
+  document.getElementById('rf_sens_name').textContent = sens;
+
+  document.getElementById('rf_act').textContent = `+${actPts} pts`;
+  document.getElementById('rf_act_name').textContent = act;
+
+  document.getElementById('rf_scope').textContent = `+${scopePts} pts`;
+  document.getElementById('rf_scope_name').textContent = scope;
+
+  document.getElementById('rf_dest').textContent = `+${destPts} pts`;
+  document.getElementById('rf_dest_name').textContent = dest || 'none';
+
+  document.getElementById('rf_rev').textContent = `+${revPts} pts`;
+  document.getElementById('rf_rev_name').textContent = rev ? 'reversible' : 'permanent';
+}
+
+function renderPipeline(d) {
+  // 01 Intent
+  const bIntent = document.getElementById('pbadge_intent');
+  const dIntent = document.getElementById('pdesc_intent');
+  if (d.intent_match) {
+    bIntent.className = 'step-result-tag out-allow';
+    bIntent.textContent = 'PASS';
+    dIntent.textContent = 'Proposal matches user request.';
+  } else {
+    bIntent.className = 'step-result-tag out-block';
+    bIntent.textContent = 'MISMATCH';
+    dIntent.textContent = 'Action mutates/transfers unrequested data.';
+  }
+
+  // 02 Resource Auth
+  const bAuth = document.getElementById('pbadge_auth');
+  const dAuth = document.getElementById('pdesc_auth');
+  const reasonsStr = (d.reasons || []).join(' ');
+  if (reasonsStr.includes('Prohibited target') || reasonsStr.includes('Prohibited policy')) {
+    bAuth.className = 'step-result-tag out-block';
+    bAuth.textContent = 'PROHIBITED';
+    dAuth.textContent = 'Protected path or egress rule triggered.';
+  } else if (reasonsStr.includes('Tool permission denied')) {
+    bAuth.className = 'step-result-tag out-block';
+    bAuth.textContent = 'DENIED';
+    dAuth.textContent = 'Missing agent tool permission.';
+  } else {
+    bAuth.className = 'step-result-tag out-allow';
+    bAuth.textContent = 'PASS';
+    dAuth.textContent = 'Tool & target within authorized scope.';
+  }
+
+  // 03 Risk
+  const bRisk = document.getElementById('pbadge_risk');
+  const dRisk = document.getElementById('pdesc_risk');
+  const score = d.risk_score;
+  if (score >= 65) {
+    bRisk.className = 'step-result-tag out-block';
+    bRisk.textContent = 'CRITICAL (' + score + ')';
+    dRisk.textContent = 'Exceeds high-risk safety threshold.';
+  } else if (score >= 30) {
+    bRisk.className = 'step-result-tag out-approval';
+    bRisk.textContent = 'MODERATE (' + score + ')';
+    dRisk.textContent = 'Requires human authorization.';
+  } else {
+    bRisk.className = 'step-result-tag out-allow';
+    bRisk.textContent = 'LOW (' + score + ')';
+    dRisk.textContent = 'Within safe autonomous limits.';
+  }
+
+  // 04 Policy
+  const bPolicy = document.getElementById('pbadge_policy');
+  const dPolicy = document.getElementById('pdesc_policy');
+  if (d.decision === 'ALLOW') {
+    bPolicy.className = 'step-result-tag out-allow';
+    bPolicy.textContent = 'ALLOW';
+    dPolicy.textContent = 'Approved for mock execution.';
+  } else if (d.decision === 'REQUIRE_APPROVAL') {
+    bPolicy.className = 'step-result-tag out-approval';
+    bPolicy.textContent = 'APPROVAL';
+    dPolicy.textContent = 'Mandatory sign-off required.';
+  } else {
+    bPolicy.className = 'step-result-tag out-block';
+    bPolicy.textContent = 'BLOCK';
+    dPolicy.textContent = 'Hard gated by safety policy.';
+  }
+}
+
+// Audit Trail
 async function loadAudit() {
   try {
     const res = await fetch('/api/audit');
     if (!res.ok) return;
     const data = await res.json();
-    const events = data.events || [];
-    const tbody = document.getElementById('audit_tbody');
-    
-    if (events.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7">
-        <div class="audit-empty">
-          <div class="audit-empty-icon">📋</div>
-          <p>No security events recorded yet. Evaluate an action or use a demo preset to generate audit entries.</p>
-        </div>
-      </td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = events.slice(0, 15).map(e => {
-      const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '—';
-      const outcome = e.verified === true ? '✓ Verified' : (e.verified === false ? '✕ Unverified' : '—');
-      
-      let decBadgeClass, decBadgeStyle = '';
-      if (e.decision === 'ALLOW') {
-        decBadgeClass = 'badge badge-armed';
-      } else if (e.decision === 'BLOCK') {
-        decBadgeClass = 'badge';
-        decBadgeStyle = 'background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-border)';
-      } else {
-        decBadgeClass = 'badge badge-mock';
-      }
-
-      return `
-        <tr>
-          <td class="mono-cell" style="color:var(--text-dim)">${timeStr}</td>
-          <td><span class="${decBadgeClass}" style="${decBadgeStyle}">${escapeHtml(e.decision)}</span></td>
-          <td><strong>${escapeHtml(e.action_type)}</strong></td>
-          <td><span class="target-pill mono-cell" title="${escapeHtml(e.target)}">${escapeHtml(e.target)}</span></td>
-          <td class="mono-cell" style="font-size:10px">${escapeHtml(e.status || 'EVALUATED')}</td>
-          <td class="mono-cell">${e.risk_score !== undefined ? e.risk_score + '/100' : '—'}</td>
-          <td style="${e.verified === false ? 'color:var(--rose); font-weight:700' : (e.verified === true ? 'color:var(--emerald)' : '')}">${outcome}</td>
-        </tr>
-      `;
-    }).join('');
+    currentAuditEvents = data.events || [];
+    renderAuditTable();
   } catch (err) {
     console.error('Audit fetch error:', err);
   }
 }
 
-// ─── Initialize ───
+function setAuditFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.tab-filter-btn').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderAuditTable();
+}
+
+function renderAuditTable() {
+  const tbody = document.getElementById('audit_table_body');
+  const query = (document.getElementById('audit_query').value || '').toLowerCase();
+
+  let filtered = currentAuditEvents;
+  if (currentFilter !== 'ALL') {
+    filtered = filtered.filter(e => e.decision === currentFilter);
+  }
+  if (query) {
+    filtered = filtered.filter(e => 
+      (e.target && e.target.toLowerCase().includes(query)) ||
+      (e.action_type && e.action_type.toLowerCase().includes(query)) ||
+      (e.request_id && e.request_id.toLowerCase().includes(query))
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-dim)">No security events found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.slice(0, 15).map((e, idx) => {
+    const dec = e.decision || 'ALLOW';
+    const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '—';
+    const outcome = e.verified === true ? '✓ verified' : (e.verified === false ? '! unverified' : '—');
+    
+    let pillClass = 'out-allow';
+    if (dec === 'BLOCK') pillClass = 'out-block';
+    if (dec === 'REQUIRE_APPROVAL') pillClass = 'out-approval';
+
+    return `
+      <tr>
+        <td class="mono-log">${timeStr}</td>
+        <td><span class="outcome-badge ${pillClass}">${dec}</span></td>
+        <td><strong style="color:#fff">${escapeHtml(e.action_type)}</strong></td>
+        <td><span class="target-log-cell" title="${escapeHtml(e.target)}">${escapeHtml(e.target)}</span></td>
+        <td class="mono-log">${escapeHtml(e.status || 'EVALUATED')}</td>
+        <td class="mono-log" style="color:#fff; font-weight:700">${e.risk_score !== undefined ? e.risk_score + '/100' : '—'}</td>
+        <td style="${e.verified === false ? 'color:var(--red); font-weight:700' : (e.verified === true ? 'color:var(--green);' : '')}">${outcome}</td>
+        <td><button type="button" class="inspect-pill-btn" onclick="openModal(${idx})">Inspect</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openModal(idx) {
+  const e = currentAuditEvents[idx];
+  if (!e) return;
+
+  const content = document.getElementById('modal_content');
+  content.innerHTML = `
+    <div class="modal-2col-kv">
+      <div class="kv-cell">
+        <span class="kv-key-txt">Request ID</span>
+        <div class="kv-val-txt">${escapeHtml(e.request_id || '—')}</div>
+      </div>
+      <div class="kv-cell">
+        <span class="kv-key-txt">Timestamp</span>
+        <div class="kv-val-txt">${e.timestamp || '—'}</div>
+      </div>
+      <div class="kv-cell">
+        <span class="kv-key-txt">Decision</span>
+        <div class="kv-val-txt" style="color:${e.decision === 'ALLOW' ? 'var(--green)' : (e.decision === 'BLOCK' ? 'var(--red)' : 'var(--amber)')}">${e.decision}</div>
+      </div>
+      <div class="kv-cell">
+        <span class="kv-key-txt">Risk Score</span>
+        <div class="kv-val-txt">${e.risk_score !== undefined ? e.risk_score + ' / 100' : '—'}</div>
+      </div>
+      <div class="kv-cell">
+        <span class="kv-key-txt">Action Type</span>
+        <div class="kv-val-txt">${escapeHtml(e.action_type)}</div>
+      </div>
+      <div class="kv-cell">
+        <span class="kv-key-txt">Execution Status</span>
+        <div class="kv-val-txt">${escapeHtml(e.status || 'EVALUATED')}</div>
+      </div>
+      <div class="kv-cell" style="grid-column: 1 / -1">
+        <span class="kv-key-txt">Target Resource</span>
+        <div class="kv-val-txt" style="color:#fff">${escapeHtml(e.target)}</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pipeline-kicker-title" style="margin-bottom:6px">Evaluation Rationale Trace</div>
+      <div class="reasons-scroll-box" style="max-height: 180px;">
+        ${(e.reasons || []).map(r => `<div class="reason-card-item">${escapeHtml(r)}</div>`).join('') || '<div class="reason-card-item">No explanation recorded.</div>'}
+      </div>
+    </div>
+
+    ${e.detected_threats && e.detected_threats.length ? `
+      <div>
+        <div class="pipeline-kicker-title" style="margin-bottom:6px; color:var(--red)">Detected Threat Indicators</div>
+        <div class="controls-pills-row">
+          ${e.detected_threats.map(t => `<span class="control-chip-badge" style="background:rgba(255,119,127,0.14); border-color:rgba(255,119,127,0.4); color:var(--red)">⚠️ ${escapeHtml(t)}</span>`).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    ${e.required_controls && e.required_controls.length ? `
+      <div>
+        <div class="pipeline-kicker-title" style="margin-bottom:6px">Required Enforced Controls</div>
+        <div class="controls-pills-row">
+          ${e.required_controls.map(c => `<span class="control-chip-badge">🛡️ ${escapeHtml(c)}</span>`).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    ${e.message ? `
+      <div class="execution-card-block">
+        <span class="pipeline-kicker-title">Execution Message</span>
+        <p class="exec-block-msg">${escapeHtml(e.message)}</p>
+      </div>
+    ` : ''}
+  `;
+
+  document.getElementById('event_modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('event_modal').classList.remove('active');
+}
+
+function closeModalOnBackdrop(evt) {
+  if (evt.target.id === 'event_modal') closeModal();
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+// Initial route check & audit load
+checkRoute();
 loadAudit();
 </script>
 </body>
