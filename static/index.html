@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TRINETRA — Context-aware AI agent action safety gateway. Evaluate, approve, and audit AI agent actions with deterministic policy enforcement.">
 <title>TRINETRA | AI Agent Action Safety Gateway</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,27 +35,45 @@
   --cyan: #06b6d4;
   --cyan-bg: rgba(6, 182, 212, 0.1);
   --cyan-border: rgba(6, 182, 212, 0.3);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: radial-gradient(circle at 50% 0%, #111a2d 0%, var(--bg-dark) 55%);
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, #111a2d 0%, var(--bg-dark) 60%);
   color: var(--text-main);
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   min-height: 100vh;
   padding: 0;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Header */
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* ─── Header ─── */
 header {
-  background: rgba(13, 18, 27, 0.85);
-  backdrop-filter: blur(14px);
+  background: rgba(13, 18, 27, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
-  padding: 12px 24px;
+  padding: 12px 28px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -67,29 +86,32 @@ header {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: linear-gradient(135deg, #06b6d4, #10b981);
-  border-radius: 8px;
+  border-radius: 9px;
   display: grid;
   place-items: center;
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+  transition: box-shadow 0.3s ease;
 }
+.logo-icon:hover { box-shadow: 0 0 28px rgba(6, 182, 212, 0.5); }
 .logo-icon svg { width: 18px; height: 18px; fill: #070a0f; }
 .brand-text h1 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: #fff;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 .brand-text span {
   font-size: 10px;
   font-weight: 600;
   color: var(--text-muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -97,11 +119,13 @@ header {
 .presets-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #090e17;
+  gap: 5px;
+  background: rgba(9, 14, 23, 0.9);
   padding: 4px 6px;
   border-radius: 999px;
   border: 1px solid var(--border);
+  flex-shrink: 1;
+  overflow-x: auto;
 }
 .presets-label {
   font-size: 10px;
@@ -109,24 +133,27 @@ header {
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 0 6px;
+  padding: 0 8px;
+  white-space: nowrap;
 }
 .preset-btn {
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-muted);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: 999px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 .preset-btn:hover {
   background: var(--bg-card);
   color: #fff;
   border-color: var(--border);
+  transform: translateY(-1px);
 }
 .preset-btn.active {
   background: var(--cyan-bg);
@@ -138,17 +165,19 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 .badge {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   gap: 6px;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 .badge-mock { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
 .badge-armed { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
@@ -158,132 +187,208 @@ header {
   border-radius: 50%;
   background: currentColor;
   box-shadow: 0 0 8px currentColor;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  50% { opacity: 0.5; box-shadow: 0 0 14px currentColor; }
 }
 
-/* Main Layout */
+/* ─── Main Layout ─── */
 main {
-  max-width: 1540px;
+  max-width: 1560px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 24px;
+  padding: 24px 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   flex: 1;
 }
 
 .command-grid {
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(460px, 1.15fr);
-  gap: 20px;
-  align-items: stretch;
+  grid-template-columns: minmax(400px, 1fr) minmax(440px, 1.15fr);
+  gap: 24px;
+  align-items: start;
 }
 
-/* Card Styles */
+/* ─── Card Styles ─── */
 .console-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  transition: box-shadow 0.3s ease;
+}
+.console-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
 }
 .card-header {
-  padding: 14px 18px;
+  padding: 14px 20px;
   background: rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 .card-title {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-main);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.card-title svg { width: 14px; height: 14px; fill: var(--cyan); }
+.card-title svg { width: 15px; height: 15px; fill: var(--cyan); flex-shrink: 0; }
 .card-body {
-  padding: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   flex: 1;
 }
 
-/* Upload Dropzone */
+/* ─── Upload Dropzone ─── */
 .upload-container {
-  border: 1px dashed #334155;
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: rgba(15, 23, 42, 0.4);
-  transition: all 0.2s ease;
+  border: 2px dashed #334155;
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  background: rgba(15, 23, 42, 0.35);
+  transition: all 0.25s ease;
   position: relative;
+  cursor: pointer;
 }
-.upload-container:hover, .upload-container.dragover {
+.upload-container:hover {
+  border-color: rgba(6, 182, 212, 0.5);
+  background: rgba(6, 182, 212, 0.04);
+}
+.upload-container.dragover {
   border-color: var(--cyan);
   background: var(--cyan-bg);
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.12);
+}
+.upload-container.upload-success {
+  border-color: var(--emerald);
+  border-style: solid;
+  background: rgba(16, 185, 129, 0.06);
+}
+.upload-container.upload-error {
+  border-color: var(--rose);
+  border-style: solid;
+  background: rgba(244, 63, 94, 0.06);
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
 }
 .upload-flex {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
 }
 .upload-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  min-width: 0;
 }
 .upload-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: #1e293b;
-  border-radius: 6px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  transition: background 0.2s;
 }
+.upload-container:hover .upload-icon { background: #253346; }
 .upload-icon svg { width: 16px; height: 16px; fill: var(--cyan); }
+.upload-text {
+  min-width: 0;
+}
 .upload-text strong {
   display: block;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #fff;
+  margin-bottom: 2px;
 }
 .upload-text span {
   font-size: 10px;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 .upload-btn {
   background: #1e293b;
   border: 1px solid #334155;
   color: #e2e8f0;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.upload-btn:hover { background: #334155; color: #fff; }
+.upload-btn:hover { background: #334155; color: #fff; transform: translateY(-1px); }
+.upload-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Upload progress */
+.upload-progress {
+  display: none;
+  margin-top: 10px;
+  background: #0f172a;
+  border-radius: 6px;
+  padding: 10px 14px;
+  align-items: center;
+  gap: 10px;
+}
+.upload-progress.active { display: flex; }
+.upload-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #334155;
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.upload-progress-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Upload chip / staged file */
 .upload-chip {
   display: none;
   background: #0f172a;
   border: 1px solid var(--emerald-border);
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin-top: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 10px;
   font-size: 11px;
   color: #cbd5e1;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
 }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .upload-chip.active { display: flex; }
 .upload-chip-left {
   display: flex;
@@ -291,34 +396,59 @@ main {
   gap: 8px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
+  min-width: 0;
+  overflow: hidden;
 }
+.upload-chip-left span { white-space: nowrap; }
 .upload-chip-tag {
   background: var(--emerald-bg);
   color: var(--emerald);
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   font-size: 9px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 .upload-remove {
   background: transparent;
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  flex-shrink: 0;
 }
-.upload-remove:hover { color: var(--rose); }
+.upload-remove:hover { color: var(--rose); background: var(--rose-bg); }
 
-/* Form Fields */
+/* Upload error message */
+.upload-error-msg {
+  display: none;
+  margin-top: 10px;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid var(--rose-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fecdd3;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
+}
+.upload-error-msg.active { display: flex; }
+
+/* ─── Form Fields ─── */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 .field-full { grid-column: 1 / -1; }
 label {
@@ -327,43 +457,59 @@ label {
   color: var(--text-muted);
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.01em;
 }
 label .required {
   color: var(--cyan);
   font-size: 9px;
   text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 input, select, textarea {
   background: #0a0e17;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
   color: var(--text-main);
   font-family: inherit;
   font-size: 12px;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+}
+input::placeholder, textarea::placeholder {
+  color: #475569;
 }
 textarea {
-  min-height: 52px;
+  min-height: 56px;
   resize: vertical;
+  line-height: 1.5;
 }
-select { cursor: pointer; }
+select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
 
-/* Security Switches */
+/* ─── Security Switches ─── */
 .switch-card {
-  background: #090e17;
+  background: rgba(9, 14, 23, 0.8);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .switch-item {
   display: flex;
@@ -373,43 +519,50 @@ select { cursor: pointer; }
   font-weight: 600;
   color: #cbd5e1;
   cursor: pointer;
+  transition: color 0.15s;
 }
+.switch-item:hover { color: #fff; }
 .switch-item input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   accent-color: var(--cyan);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-/* Action Buttons */
+/* ─── Action Buttons ─── */
 .button-row {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 6px;
 }
 .btn {
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-  padding: 10px 14px;
-  border-radius: 6px;
+  padding: 11px 14px;
+  border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.15s ease;
+  gap: 7px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
+.btn:active { transform: scale(0.97); }
 .btn-primary {
   background: linear-gradient(135deg, #0284c7, #06b6d4);
   color: #fff;
-  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.25);
+  box-shadow: 0 3px 14px rgba(6, 182, 212, 0.25);
 }
 .btn-primary:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
 }
 .btn-ghost {
   background: #1e293b;
@@ -419,6 +572,7 @@ select { cursor: pointer; }
 .btn-ghost:hover {
   background: #334155;
   color: #fff;
+  transform: translateY(-1px);
 }
 .btn-amber {
   background: #271a06;
@@ -427,32 +581,32 @@ select { cursor: pointer; }
 }
 .btn-amber:hover {
   background: #3d2806;
+  transform: translateY(-1px);
 }
 
-/* Right Panel: Decision & Monitor */
+/* ─── Right Panel: Decision & Monitor ─── */
 .monitor-ready {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 32px 20px;
-  gap: 16px;
+  padding: 40px 24px;
+  gap: 18px;
   margin: auto 0;
 }
 .radar-ring {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  border: 2px dashed rgba(6, 182, 212, 0.4);
+  border: 2px dashed rgba(6, 182, 212, 0.35);
   display: grid;
   place-items: center;
-  animation: spin 18s linear infinite;
+  animation: spin 20s linear infinite;
 }
-@keyframes spin { 100% { transform: rotate(360deg); } }
 .radar-ring svg { width: 28px; height: 28px; fill: var(--cyan); }
 .monitor-ready h3 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
 }
@@ -460,30 +614,39 @@ select { cursor: pointer; }
   color: var(--text-muted);
   font-size: 12px;
   max-width: 380px;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+.capabilities-wrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 400px;
 }
 
-/* Active Evaluation Results */
+/* ─── Active Evaluation Results ─── */
 .result-container {
   display: none;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  animation: fadeIn 0.4s ease;
 }
 .result-container.active { display: flex; }
 
 .decision-hero {
-  border-radius: 8px;
-  padding: 16px;
-  background: #090e17;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  background: rgba(9, 14, 23, 0.9);
   border: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 .decision-left {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 .decision-label {
   font-size: 9px;
@@ -496,12 +659,13 @@ select { cursor: pointer; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 15px;
   font-weight: 800;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 7px 16px;
+  border-radius: 8px;
   letter-spacing: 0.06em;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.3s ease;
 }
 .decision-pill.ALLOW { background: var(--emerald-bg); color: var(--emerald); border: 1px solid var(--emerald-border); }
 .decision-pill.REQUIRE_APPROVAL { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
@@ -512,10 +676,11 @@ select { cursor: pointer; }
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  flex-shrink: 0;
 }
 .score-value {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
 }
@@ -523,7 +688,7 @@ select { cursor: pointer; }
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 .score-track {
   width: 140px;
@@ -536,13 +701,13 @@ select { cursor: pointer; }
 .score-fill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.4s ease;
+  transition: width 0.5s ease, background 0.5s ease;
 }
 
-/* Intent Banner */
+/* ─── Intent Banner ─── */
 .intent-banner {
-  border-radius: 6px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 11px 16px;
   font-size: 12px;
   font-weight: 600;
   display: flex;
@@ -560,41 +725,43 @@ select { cursor: pointer; }
   color: #fecdd3;
 }
 
-/* Rationale & Reasons */
+/* ─── Rationale & Reasons ─── */
 .section-subtitle {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-dim);
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .reasons-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 170px;
+  max-height: 200px;
   overflow-y: auto;
   padding-right: 4px;
 }
 .reason-card {
-  background: #090e17;
+  background: rgba(9, 14, 23, 0.8);
   border: 1px solid #1e293b;
   border-left: 3px solid #38bdf8;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 5px;
   font-size: 11px;
   color: #cbd5e1;
-  line-height: 1.45;
+  line-height: 1.5;
+  transition: background 0.15s;
 }
+.reason-card:hover { background: rgba(15, 23, 42, 0.9); }
 .reason-card.prohibited { border-left-color: var(--rose); }
 .reason-card.approval { border-left-color: var(--amber); }
 
-/* Required Controls */
+/* ─── Required Controls ─── */
 .controls-wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
 }
 .control-pill {
   background: #162032;
@@ -602,27 +769,29 @@ select { cursor: pointer; }
   color: #93c5fd;
   font-size: 10px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
-/* Execution Status Box */
+/* ─── Execution Status Box ─── */
 .execution-card {
-  background: #090e17;
+  background: rgba(9, 14, 23, 0.8);
   border: 1px solid #253346;
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  animation: fadeIn 0.3s ease;
 }
 .exec-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 .exec-status-pill {
   font-family: 'JetBrains Mono', monospace;
@@ -632,18 +801,21 @@ select { cursor: pointer; }
 .exec-message {
   font-size: 11px;
   color: var(--text-muted);
+  line-height: 1.5;
 }
 
-/* Bottom Audit Trail */
+/* ─── Bottom Audit Trail ─── */
 .audit-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
 }
 .audit-table-wrap {
   overflow-x: auto;
+  max-height: 380px;
+  overflow-y: auto;
 }
 table.audit-table {
   width: 100%;
@@ -658,17 +830,21 @@ table.audit-table th {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 10px 14px;
+  padding: 11px 16px;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--bg-card);
 }
 table.audit-table td {
-  padding: 9px 14px;
+  padding: 10px 16px;
   border-bottom: 1px solid #162032;
   color: #cbd5e1;
   vertical-align: middle;
 }
 table.audit-table tr:last-child td { border-bottom: none; }
-table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
+table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .mono-cell { font-family: 'JetBrains Mono', monospace; }
 .target-pill {
   max-width: 260px;
@@ -678,27 +854,93 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
   display: inline-block;
 }
 
-/* Toast */
+/* Audit empty state */
+.audit-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  gap: 10px;
+}
+.audit-empty-icon {
+  font-size: 28px;
+  opacity: 0.4;
+}
+.audit-empty p {
+  color: var(--text-dim);
+  font-size: 12px;
+  max-width: 300px;
+}
+
+/* ─── Toast ─── */
 .toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #1e131d;
-  border: 1px solid var(--rose-border);
-  color: #fecdd3;
-  padding: 12px 18px;
-  border-radius: 8px;
+  bottom: 28px;
+  right: 28px;
+  padding: 13px 20px;
+  border-radius: var(--radius-md);
   font-size: 12px;
+  font-weight: 600;
   display: none;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   z-index: 1000;
+  max-width: 420px;
+  animation: slideIn 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .toast.active { display: block; }
+.toast.toast-error {
+  background: rgba(30, 19, 29, 0.95);
+  border: 1px solid var(--rose-border);
+  color: #fecdd3;
+}
+.toast.toast-success {
+  background: rgba(13, 27, 23, 0.95);
+  border: 1px solid var(--emerald-border);
+  color: #a7f3d0;
+}
+.toast.toast-info {
+  background: rgba(13, 23, 35, 0.95);
+  border: 1px solid var(--cyan-border);
+  color: #a5f3fc;
+}
 
-/* Responsive */
-@media (max-width: 1040px) {
+/* ─── Footer ─── */
+footer {
+  padding: 16px 28px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  background: rgba(13, 18, 27, 0.5);
+}
+footer p {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+footer strong {
+  color: var(--text-muted);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1080px) {
   .command-grid { grid-template-columns: 1fr; }
   .presets-bar { display: none; }
+  header { padding: 12px 16px; }
+  main { padding: 16px; }
+}
+
+@media (max-width: 640px) {
+  .button-row { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .decision-hero { flex-direction: column; align-items: flex-start; }
+  .score-box { align-items: flex-start; }
+  .header-meta { display: none; }
 }
 </style>
 </head>
@@ -716,13 +958,13 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
   </div>
 
   <!-- Interactive 1-Click Demo Scenarios -->
-  <div class="presets-bar">
+  <div class="presets-bar" id="presets_bar">
     <span class="presets-label">⚡ Demo Presets:</span>
-    <button class="preset-btn" onclick="loadPreset('safe_summary')">Safe Summary (ALLOW)</button>
-    <button class="preset-btn" onclick="loadPreset('external_leak')">External Leak (BLOCK)</button>
-    <button class="preset-btn" onclick="loadPreset('high_impact_delete')">Org Delete (APPROVAL)</button>
-    <button class="preset-btn" onclick="loadPreset('unauth_tool')">Unauth Tool (BLOCK)</button>
-    <button class="preset-btn" onclick="loadPreset('verification_failure')">Verify Fail (SIMULATED)</button>
+    <button class="preset-btn" id="preset_safe_summary" onclick="loadPreset('safe_summary')">Safe Summary (ALLOW)</button>
+    <button class="preset-btn" id="preset_external_leak" onclick="loadPreset('external_leak')">External Leak (BLOCK)</button>
+    <button class="preset-btn" id="preset_high_impact_delete" onclick="loadPreset('high_impact_delete')">Org Delete (APPROVAL)</button>
+    <button class="preset-btn" id="preset_unauth_tool" onclick="loadPreset('unauth_tool')">Unauth Tool (BLOCK)</button>
+    <button class="preset-btn" id="preset_verification_failure" onclick="loadPreset('verification_failure')">Verify Fail (SIMULATED)</button>
   </div>
 
   <div class="header-meta">
@@ -747,29 +989,42 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
       <div class="card-body">
         
         <!-- Upload to Agent Workspace Component -->
-        <div class="upload-container" id="dropzone">
+        <div class="upload-container" id="dropzone" role="button" tabindex="0" aria-label="Upload document to agent workspace">
           <input type="file" id="file_input" style="display:none" accept=".txt,.pdf,.json,.csv,.md,.log,.yaml,.yml,.docx,.xlsx" onchange="handleFileSelect(event)">
           <div class="upload-flex">
             <div class="upload-info">
-              <div class="upload-icon">
+              <div class="upload-icon" id="upload_icon">
                 <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
               </div>
               <div class="upload-text">
-                <strong>Upload Document to Agent Workspace</strong>
-                <span>Drag & drop or browse .txt, .pdf, .json, .csv, .md (max 5MB)</span>
+                <strong id="upload_title">Upload Document to Agent Workspace</strong>
+                <span id="upload_subtitle">Drag & drop or browse · .txt, .pdf, .json, .csv, .md, .log, .yaml, .docx, .xlsx · max 5 MB</span>
               </div>
             </div>
-            <button type="button" class="upload-btn" onclick="document.getElementById('file_input').click()">Browse File</button>
+            <button type="button" class="upload-btn" id="upload_browse_btn" onclick="document.getElementById('file_input').click()">Browse File</button>
           </div>
           
+          <!-- Loading state -->
+          <div class="upload-progress" id="upload_progress">
+            <div class="upload-spinner"></div>
+            <span class="upload-progress-text">Uploading and validating file…</span>
+          </div>
+          
+          <!-- Staged file chip -->
           <div class="upload-chip" id="upload_chip">
             <div class="upload-chip-left">
               <span>📄</span>
               <span id="chip_filename">document.pdf</span>
               <span class="upload-chip-tag" id="chip_size">14 KB</span>
-              <span style="color:var(--text-dim)" id="chip_hash">SHA: 7f3a...</span>
+              <span style="color:var(--text-dim)" id="chip_hash">SHA: 7f3a…</span>
             </div>
-            <button type="button" class="upload-remove" title="Remove staged file" onclick="clearUploadedFile()">✕</button>
+            <button type="button" class="upload-remove" title="Remove staged file" onclick="clearUploadedFile()" aria-label="Remove file">✕</button>
+          </div>
+          
+          <!-- Error message -->
+          <div class="upload-error-msg" id="upload_error_msg">
+            <span>⚠</span>
+            <span id="upload_error_text">Error details here</span>
           </div>
         </div>
 
@@ -844,7 +1099,7 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
             </div>
           </div>
 
-          <div class="switch-card" style="margin-top:12px;">
+          <div class="switch-card" style="margin-top:14px;">
             <label class="switch-item">
               <input type="checkbox" id="tool_authorized" checked>
               <span>Agent has valid tool execution authorization</span>
@@ -860,10 +1115,10 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
               Evaluate Policy
             </button>
-            <button type="button" class="btn btn-ghost" onclick="executeAction(false)">
+            <button type="button" class="btn btn-ghost" id="btn_execute" onclick="executeAction(false)">
               Try Execution
             </button>
-            <button type="button" class="btn btn-amber" onclick="executeAction(true)">
+            <button type="button" class="btn btn-amber" id="btn_approve" onclick="executeAction(true)">
               Approve &amp; Execute
             </button>
           </div>
@@ -891,7 +1146,7 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
           </div>
           <h3>Policy Gateway Active &amp; Ready</h3>
           <p>Configure an agent action on the left or click any <strong>⚡ Demo Preset</strong> above to evaluate policy enforcement, intent alignment, and risk scoring in real-time.</p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:380px;">
+          <div class="capabilities-wrap">
             <span class="control-pill">🛡️ Hard Prohibitions Gate</span>
             <span class="control-pill">🔑 Resource Authorization</span>
             <span class="control-pill">🧭 Intent Alignment Engine</span>
@@ -961,9 +1216,9 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
         <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
         Real-Time Security Audit Trail
       </span>
-      <button class="upload-btn" style="padding:3px 8px; font-size:10px" onclick="loadAudit()">Refresh Audit Log</button>
+      <button class="upload-btn" id="btn_refresh_audit" style="padding:4px 10px; font-size:10px" onclick="loadAudit()">Refresh</button>
     </div>
-    <div class="audit-table-wrap">
+    <div class="audit-table-wrap" id="audit_table_wrap">
       <table class="audit-table">
         <thead>
           <tr>
@@ -977,17 +1232,31 @@ table.audit-table tr:hover td { background: rgba(255, 255, 255, 0.015); }
           </tr>
         </thead>
         <tbody id="audit_tbody">
-          <tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-dim)">Loading security events...</td></tr>
+          <tr><td colspan="7">
+            <div class="audit-empty">
+              <div class="audit-empty-icon">📋</div>
+              <p>No security events recorded yet. Evaluate an action or use a demo preset to generate audit entries.</p>
+            </div>
+          </td></tr>
         </tbody>
       </table>
     </div>
   </section>
 </main>
 
+<footer>
+  <p><strong>TRINETRA</strong> — Context-Aware Safety Gateway for AI Agent Actions · Mock Sandbox Mode · No real systems connected</p>
+</footer>
+
 <div class="toast" id="toast_msg"></div>
 
 <script>
-// Preset Scenarios
+// ─── Constants ───
+const ALLOWED_EXTENSIONS = new Set(['.txt', '.pdf', '.json', '.csv', '.md', '.log', '.yaml', '.yml', '.docx', '.xlsx']);
+const PROHIBITED_EXTENSIONS = new Set(['.exe', '.sh', '.bat', '.bin', '.py', '.cmd', '.vbs', '.ps1', '.dll', '.so']);
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5 MB
+
+// ─── Preset Scenarios ───
 const PRESETS = {
   safe_summary: {
     user_request: "Summarise the quarterly earnings document for me.",
@@ -1051,19 +1320,48 @@ const PRESETS = {
   }
 };
 
+// ─── Utility Helpers ───
 function val(id) { return document.getElementById(id).value; }
 function setVal(id, v) { document.getElementById(id).value = v; }
 
-function showToast(msg) {
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+function getFileExtension(filename) {
+  const dot = filename.lastIndexOf('.');
+  return dot >= 0 ? filename.slice(dot).toLowerCase() : '';
+}
+
+// ─── Toast System ───
+let toastTimer = null;
+function showToast(msg, type = 'error') {
   const t = document.getElementById('toast_msg');
   t.textContent = msg;
-  t.classList.add('active');
-  setTimeout(() => t.classList.remove('active'), 4000);
+  t.className = 'toast active toast-' + type;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('active'); }, 4500);
 }
+
+// ─── Preset Loading ───
+let activePreset = null;
 
 function loadPreset(key) {
   const p = PRESETS[key];
   if (!p) return;
+
+  // Highlight active preset button
+  document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+  const btn = document.getElementById('preset_' + key);
+  if (btn) btn.classList.add('active');
+  activePreset = key;
+
   setVal('user_request', p.user_request);
   setVal('agent_goal', p.agent_goal);
   setVal('action_type', p.action_type);
@@ -1077,6 +1375,7 @@ function loadPreset(key) {
   evaluatePolicy();
 }
 
+// ─── Form Payload ───
 function getPayload() {
   return {
     user_request: val('user_request'),
@@ -1092,13 +1391,31 @@ function getPayload() {
   };
 }
 
-// Upload Handling
+// ─── Upload Handling ───
 const dropzone = document.getElementById('dropzone');
-['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, (evt) => { evt.preventDefault(); dropzone.classList.add('dragover'); }));
-['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, (evt) => { evt.preventDefault(); dropzone.classList.remove('dragover'); }));
+
+// Drag and drop events
+['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, (evt) => {
+  evt.preventDefault();
+  evt.stopPropagation();
+  dropzone.classList.add('dragover');
+}));
+['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, (evt) => {
+  evt.preventDefault();
+  evt.stopPropagation();
+  dropzone.classList.remove('dragover');
+}));
 dropzone.addEventListener('drop', (evt) => {
   const files = evt.dataTransfer.files;
   if (files && files.length) uploadFile(files[0]);
+});
+
+// Keyboard accessibility for dropzone
+dropzone.addEventListener('keydown', (evt) => {
+  if (evt.key === 'Enter' || evt.key === ' ') {
+    evt.preventDefault();
+    document.getElementById('file_input').click();
+  }
 });
 
 function handleFileSelect(evt) {
@@ -1106,7 +1423,68 @@ function handleFileSelect(evt) {
   if (files && files.length) uploadFile(files[0]);
 }
 
+function showUploadError(msg) {
+  const container = document.getElementById('dropzone');
+  const errEl = document.getElementById('upload_error_msg');
+  const errText = document.getElementById('upload_error_text');
+
+  container.classList.add('upload-error');
+  errText.textContent = msg;
+  errEl.classList.add('active');
+
+  setTimeout(() => {
+    container.classList.remove('upload-error');
+    errEl.classList.remove('active');
+  }, 5000);
+}
+
+function showUploadProgress(show) {
+  const el = document.getElementById('upload_progress');
+  if (show) {
+    el.classList.add('active');
+    document.getElementById('upload_browse_btn').disabled = true;
+  } else {
+    el.classList.remove('active');
+    document.getElementById('upload_browse_btn').disabled = false;
+  }
+}
+
 async function uploadFile(file) {
+  // Reset previous states
+  document.getElementById('upload_error_msg').classList.remove('active');
+  document.getElementById('dropzone').classList.remove('upload-error', 'upload-success');
+
+  // ─── Client-side validation ───
+  const ext = getFileExtension(file.name);
+
+  if (PROHIBITED_EXTENSIONS.has(ext)) {
+    showUploadError(`File extension '${ext}' is prohibited for security reasons. Executable files cannot be staged.`);
+    showToast(`Upload blocked: '${ext}' files are prohibited`, 'error');
+    return;
+  }
+
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
+    const allowed = Array.from(ALLOWED_EXTENSIONS).sort().join(', ');
+    showUploadError(`Unsupported file extension '${ext}'. Permitted formats: ${allowed}`);
+    showToast(`Upload blocked: unsupported file type '${ext}'`, 'error');
+    return;
+  }
+
+  if (file.size > MAX_UPLOAD_SIZE) {
+    showUploadError(`File size (${formatFileSize(file.size)}) exceeds the 5 MB limit.`);
+    showToast('Upload blocked: file exceeds 5 MB limit', 'error');
+    return;
+  }
+
+  if (file.size === 0) {
+    showUploadError('Cannot upload an empty file.');
+    showToast('Upload blocked: empty file', 'error');
+    return;
+  }
+
+  // ─── Upload to backend ───
+  showUploadProgress(true);
+
   try {
     const formData = new FormData();
     formData.append('file', file, file.name);
@@ -1116,33 +1494,43 @@ async function uploadFile(file) {
       body: formData
     });
 
+    showUploadProgress(false);
+
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
       throw new Error(err.detail || 'Upload failed');
     }
 
     const data = await res.json();
     setVal('target', data.filename);
     
-    // Show chip
+    // Show success state
+    const container = document.getElementById('dropzone');
+    container.classList.add('upload-success');
+
+    // Populate chip
     document.getElementById('chip_filename').textContent = data.filename;
-    document.getElementById('chip_size').textContent = (data.size_bytes / 1024).toFixed(1) + ' KB';
-    document.getElementById('chip_hash').textContent = 'SHA: ' + data.sha256.slice(0, 8) + '...';
+    document.getElementById('chip_size').textContent = formatFileSize(data.size_bytes);
+    document.getElementById('chip_hash').textContent = 'SHA-256: ' + data.sha256.slice(0, 10) + '…';
     document.getElementById('upload_chip').classList.add('active');
 
-    showToast(`File "${data.filename}" staged in mock workspace`);
+    showToast(`"${data.filename}" staged in mock workspace (${formatFileSize(data.size_bytes)})`, 'success');
     loadAudit();
   } catch (err) {
-    showToast('Upload error: ' + err.message);
+    showUploadProgress(false);
+    showUploadError(err.message);
+    showToast('Upload error: ' + err.message, 'error');
   }
 }
 
 function clearUploadedFile() {
   document.getElementById('file_input').value = '';
   document.getElementById('upload_chip').classList.remove('active');
+  document.getElementById('dropzone').classList.remove('upload-success');
+  document.getElementById('upload_error_msg').classList.remove('active');
 }
 
-// API Calls
+// ─── API Calls ───
 async function evaluatePolicy() {
   try {
     const payload = getPayload();
@@ -1156,7 +1544,7 @@ async function evaluatePolicy() {
     renderEvaluation(data);
     loadAudit();
   } catch (err) {
-    showToast('Error: ' + err.message);
+    showToast('Error: ' + err.message, 'error');
   }
 }
 
@@ -1183,10 +1571,11 @@ async function executeAction(approved) {
     renderEvaluation(evalData, data);
     loadAudit();
   } catch (err) {
-    showToast('Execution error: ' + err.message);
+    showToast('Execution error: ' + err.message, 'error');
   }
 }
 
+// ─── Render Evaluation ───
 function renderEvaluation(d, execution = null) {
   document.getElementById('ready_state').style.display = 'none';
   document.getElementById('result_container').classList.add('active');
@@ -1195,27 +1584,32 @@ function renderEvaluation(d, execution = null) {
   // Decision Pill
   const pill = document.getElementById('decision_badge');
   pill.className = 'decision-pill ' + d.decision;
-  pill.textContent = d.decision.replace('_', ' ');
+  const decisionLabel = d.decision === 'REQUIRE_APPROVAL' ? 'REQUIRE APPROVAL' : d.decision;
+  pill.textContent = decisionLabel;
 
   // Risk Score & Tier
   const score = Math.max(0, Math.min(100, d.risk_score));
   document.getElementById('score_display').innerHTML = `${score} <span style="font-size:14px; font-weight:600; color:var(--text-dim)">/ 100</span>`;
   const fill = document.getElementById('score_fill');
-  fill.style.width = score + '%';
+  fill.style.width = Math.max(3, score) + '%';
   
   const tier = document.getElementById('score_tier');
+  const scoreEl = document.getElementById('score_display');
   if (score >= 65) {
     tier.textContent = 'HIGH RISK (CRITICAL)';
     tier.style.color = 'var(--rose)';
-    fill.style.background = 'var(--rose)';
+    fill.style.background = 'linear-gradient(90deg, var(--amber), var(--rose))';
+    scoreEl.style.color = 'var(--rose)';
   } else if (score >= 30) {
     tier.textContent = 'MODERATE RISK';
     tier.style.color = 'var(--amber)';
-    fill.style.background = 'var(--amber)';
+    fill.style.background = 'linear-gradient(90deg, var(--amber), #ef9a0d)';
+    scoreEl.style.color = 'var(--amber)';
   } else {
     tier.textContent = 'LOW RISK';
     tier.style.color = 'var(--emerald)';
     fill.style.background = 'var(--emerald)';
+    scoreEl.style.color = 'var(--emerald)';
   }
 
   // Intent Banner
@@ -1235,7 +1629,7 @@ function renderEvaluation(d, execution = null) {
   reasonsBox.innerHTML = (d.reasons || []).map(r => {
     let cls = 'reason-card';
     if (r.includes('Prohibited') || r.includes('BLOCK') || r.includes('denied')) cls += ' prohibited';
-    if (r.includes('High-impact') || r.includes('approval')) cls += ' approval';
+    else if (r.includes('High-impact') || r.includes('approval')) cls += ' approval';
     return `<div class="${cls}">${escapeHtml(r)}</div>`;
   }).join('') || '<div class="reason-card">No explanation returned.</div>';
 
@@ -1259,19 +1653,32 @@ function renderEvaluation(d, execution = null) {
     if (execution.status === 'EXECUTED_IN_MOCK') {
       stBadge.style.background = 'var(--emerald-bg)';
       stBadge.style.color = 'var(--emerald)';
+      stBadge.style.border = '1px solid var(--emerald-border)';
     } else if (execution.status === 'EXECUTED_BUT_UNVERIFIED') {
       stBadge.style.background = 'var(--rose-bg)';
       stBadge.style.color = 'var(--rose)';
+      stBadge.style.border = '1px solid var(--rose-border)';
+    } else if (execution.status === 'BLOCKED') {
+      stBadge.style.background = 'var(--rose-bg)';
+      stBadge.style.color = 'var(--rose)';
+      stBadge.style.border = '1px solid var(--rose-border)';
     } else {
       stBadge.style.background = 'var(--amber-bg)';
       stBadge.style.color = 'var(--amber)';
+      stBadge.style.border = '1px solid var(--amber-border)';
     }
     document.getElementById('exec_message').textContent = execution.message;
   } else {
     execCard.style.display = 'none';
   }
+
+  // Scroll result into view on mobile
+  if (window.innerWidth <= 1080) {
+    document.getElementById('result_container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
+// ─── Audit Trail ───
 async function loadAudit() {
   try {
     const res = await fetch('/api/audit');
@@ -1281,18 +1688,33 @@ async function loadAudit() {
     const tbody = document.getElementById('audit_tbody');
     
     if (events.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-dim)">No security events recorded yet.</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="7">
+        <div class="audit-empty">
+          <div class="audit-empty-icon">📋</div>
+          <p>No security events recorded yet. Evaluate an action or use a demo preset to generate audit entries.</p>
+        </div>
+      </td></tr>`;
       return;
     }
 
-    tbody.innerHTML = events.slice(0, 10).map(e => {
-      const pillClass = e.decision || 'ALLOW';
+    tbody.innerHTML = events.slice(0, 15).map(e => {
       const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '—';
       const outcome = e.verified === true ? '✓ Verified' : (e.verified === false ? '✕ Unverified' : '—');
+      
+      let decBadgeClass, decBadgeStyle = '';
+      if (e.decision === 'ALLOW') {
+        decBadgeClass = 'badge badge-armed';
+      } else if (e.decision === 'BLOCK') {
+        decBadgeClass = 'badge';
+        decBadgeStyle = 'background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-border)';
+      } else {
+        decBadgeClass = 'badge badge-mock';
+      }
+
       return `
         <tr>
           <td class="mono-cell" style="color:var(--text-dim)">${timeStr}</td>
-          <td><span class="badge ${pillClass === 'ALLOW' ? 'badge-armed' : (pillClass === 'BLOCK' ? 'badge' : 'badge-mock')}" style="${pillClass === 'BLOCK' ? 'background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-border)' : ''}">${e.decision}</span></td>
+          <td><span class="${decBadgeClass}" style="${decBadgeStyle}">${escapeHtml(e.decision)}</span></td>
           <td><strong>${escapeHtml(e.action_type)}</strong></td>
           <td><span class="target-pill mono-cell" title="${escapeHtml(e.target)}">${escapeHtml(e.target)}</span></td>
           <td class="mono-cell" style="font-size:10px">${escapeHtml(e.status || 'EVALUATED')}</td>
@@ -1306,10 +1728,7 @@ async function loadAudit() {
   }
 }
 
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-}
-
+// ─── Initialize ───
 loadAudit();
 </script>
 </body>
